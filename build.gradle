@@ -1,0 +1,69 @@
+buildscript {
+    repositories {
+        jcenter()
+		mavenCentral()
+    }
+	
+	dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+
+allprojects {
+    apply plugin: "eclipse"
+
+    version = '1.0'
+	
+    ext {
+        appName = "KageCloud"
+    }
+
+    repositories {
+		jcenter()
+    }
+}
+
+project(":wrapper") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        compile project(":core")
+		
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
+		
+		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+		compile group: 'commons-io', name: 'commons-io', version: '2.5'
+    }
+}
+
+project(":plugin") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        compile project(":core")
+		
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
+		
+		compile files('libs/spigot-1.11.jar')
+		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+    }
+}
+
+project(":core") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
+		
+		compile files('libs/waterfall.jar')
+		
+		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+    }
+}
+
+tasks.eclipse.doLast {
+    delete ".project"
+}
