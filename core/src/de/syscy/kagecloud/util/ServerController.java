@@ -36,7 +36,7 @@ public abstract class ServerController implements Runnable, ScheduledTask {
 		}
 
 		for(String startingServerInfo : Collections.unmodifiableCollection(plugin.getStartingServerTemplates())) {
-			if(startingServerInfo.equals(templateName)) {
+			if(templateName.equals(startingServerInfo)) {
 				serverInfoList.add(new StartingServerInfo());
 			}
 		}
