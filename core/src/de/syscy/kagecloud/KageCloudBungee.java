@@ -249,7 +249,7 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 		final InputStream defConfigStream = getResource("/config.yml");
 
 		try {
-			configFile.createNewFile();
+			saveDefaultConfig();
 
 			if(defConfigStream != null) {
 				Configuration defConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new InputStreamReader(defConfigStream, Charsets.UTF_8));
@@ -272,7 +272,7 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 	public void saveDefaultConfig() {
 		if(!configFile.exists()) {
-			saveResource("config.yml", false);
+			saveResource("/config.yml", false);
 		}
 	}
 

@@ -2,7 +2,6 @@ package de.syscy.kagecloud.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import de.syscy.kagecloud.CloudServerInfo;
@@ -35,7 +34,7 @@ public abstract class ServerController implements Runnable, ScheduledTask {
 			}
 		}
 
-		for(String startingServerInfo : Collections.unmodifiableCollection(plugin.getStartingServerTemplates())) {
+		for(String startingServerInfo : new ArrayList<>(plugin.getStartingServerTemplates())) {
 			if(templateName.equals(startingServerInfo)) {
 				serverInfoList.add(new StartingServerInfo());
 			}
