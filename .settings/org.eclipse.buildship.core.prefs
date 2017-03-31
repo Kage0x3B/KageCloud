@@ -1,2 +1,8 @@
-GRADLE_FILTERS=1.0-projectRelativePath-matches-false-false-core,1.0-projectRelativePath-matches-false-false-plugin,1.0-projectRelativePath-matches-false-false-wrapper,1.0-projectRelativePath-matches-false-false-build,1.0-projectRelativePath-matches-false-false-.gradle
+connection.arguments=
+connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
+connection.java.home=C\:\\Program Files\\Java\\jdk1.8.0_121
+connection.jvm.arguments=
+connection.project.dir=
+derived.resources=.gradle,build
 eclipse.preferences.version=1
+project.path=\:
