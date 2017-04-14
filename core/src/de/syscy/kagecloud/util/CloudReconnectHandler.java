@@ -21,7 +21,7 @@ public class CloudReconnectHandler extends AbstractReconnectHandler {
 		List<CloudServerInfo> availableLobbyServers = plugin.getJoinableLobbyServers(player);
 
 		if(!availableLobbyServers.isEmpty()) {
-			return Collections.min(availableLobbyServers);
+			return Collections.max(availableLobbyServers);
 		} else {
 			player.disconnect(new TextComponent(ChatColor.RED + "No lobby server available."));
 
