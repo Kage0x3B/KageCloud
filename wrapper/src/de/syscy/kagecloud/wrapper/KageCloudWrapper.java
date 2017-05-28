@@ -21,7 +21,7 @@ import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.configuration.file.FileConfiguration;
 import de.syscy.kagecloud.configuration.file.YamlConfiguration;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
-import de.syscy.kagecloud.network.packet.ChangeStatusPacket;
+import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.util.Charsets;
 import de.syscy.kagecloud.util.UUID;
 import de.syscy.kagecloud.wrapper.network.CloudWrapperClient;
@@ -130,10 +130,6 @@ public class KageCloudWrapper implements ICloudNode {
 		return portCounter++;
 	}
 
-	public static void main(String[] args) {
-		new KageCloudWrapper();
-	}
-
 	public FileConfiguration getConfig() {
 		if(config == null) {
 			reloadConfig();
@@ -226,5 +222,9 @@ public class KageCloudWrapper implements ICloudNode {
 		} catch(IOException ex) {
 			return null;
 		}
+	}
+
+	public static void main(String[] args) {
+		new KageCloudWrapper();
 	}
 }

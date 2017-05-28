@@ -1,21 +1,21 @@
 package de.syscy.kagecloud.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import de.syscy.kagecloud.CloudServerInfo;
-import de.syscy.kagecloud.KageCloudBungee;
+import de.syscy.kagecloud.CloudPlayer;
+import de.syscy.kagecloud.CloudServer;
+import de.syscy.kagecloud.KageCloudCore;
+import de.syscy.kagecloud.scheduler.ScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 
-public abstract class ServerController implements Runnable, ScheduledTask {
+public abstract class ServerController implements Runnable {
 	private final @Getter String templateName;
-	private @Setter KageCloudBungee plugin;
-	private @Setter ScheduledTask scheduledTask;
+	private @Setter KageCloudCore plugin;
+	private @Getter @Setter ScheduledTask task;
 
 	public ServerController(String templateName) {
 		this.templateName = templateName.toLowerCase();
@@ -25,10 +25,10 @@ public abstract class ServerController implements Runnable, ScheduledTask {
 		return plugin.getCurrentServerAmount(templateName);
 	}
 
-	protected List<CloudServerInfo> getAllCurrentServers() {
-		List<CloudServerInfo> serverInfoList = new ArrayList<>(plugin.getServers().size() + plugin.getStartingServerTemplates().size());
+	protected List<CloudServer> getAllCurrentServers() {
+		List<CloudServer> serverInfoList = new ArrayList<>(plugin.getServers().size() + plugin.getStartingServerTemplates().size());
 
-		for(CloudServerInfo serverInfo : plugin.getServers().values()) {
+		for(CloudServer serverInfo : plugin.getServers().values()) {
 			if(serverInfo.getTemplateName().equals(templateName)) {
 				serverInfoList.add(serverInfo);
 			}
@@ -47,39 +47,14 @@ public abstract class ServerController implements Runnable, ScheduledTask {
 		plugin.createServer(templateName);
 	}
 
-	@Override
-	public int getId() {
-		return scheduledTask.getId();
-	}
-
-	@Override
-	public Plugin getOwner() {
-		return scheduledTask.getOwner();
-	}
-
-	@Override
-	public Runnable getTask() {
-		return this;
-	}
-
-	@Override
-	public void cancel() {
-		scheduledTask.cancel();
-	}
-
-	private class StartingServerInfo extends CloudServerInfo {
+	private class StartingServerInfo extends CloudServer {
 		protected StartingServerInfo() {
-			super(null, templateName, null, templateName, false, templateName, templateName == "lobby");
+			super(null, templateName, null, false, templateName, templateName.toLowerCase().contains("lobby"));
 		}
 
 		@Override
-		public Collection<ProxiedPlayer> getPlayers() {
-			return new ArrayList<>(0);
-		}
-
-		@Override
-		public int hashCode() {
-			return templateName.hashCode();
+		public Map<UUID, CloudPlayer> getPlayers() {
+			return new HashMap<>(0);
 		}
 	}
 }

@@ -20,7 +20,7 @@ public class CloudWrapperClient extends Client {
 	public void connect(String ip, int tcpPort) throws IOException {
 		addListener(new CloudWrapperNetworkListener(wrapper));
 
-		Packet.registerClasses(getKryo());
+		Packet.registerKryoClasses(getKryo());
 
 		new Thread(this, "Client").start();
 

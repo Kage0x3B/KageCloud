@@ -9,7 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.syscy.kagecloud.ICloudNode;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
-import de.syscy.kagecloud.network.packet.ChangeStatusPacket;
+import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.spigot.network.CloudPluginClient;
 import de.syscy.kagecloud.util.UUID;
 import lombok.Getter;

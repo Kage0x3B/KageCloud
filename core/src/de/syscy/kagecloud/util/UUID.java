@@ -461,7 +461,10 @@ public final class UUID implements Serializable, Comparable<UUID> {
 	public static class UUIDSerializer extends Serializer<UUID> {
 		@Override
 		public UUID read(Kryo kryo, Input input, Class<UUID> type) {
-			return new UUID(input.readLong(), input.readLong());
+			long mostSigBits = input.readLong();
+			long leastSigBits = input.readLong();
+
+			return new UUID(mostSigBits, leastSigBits);
 		}
 
 		@Override

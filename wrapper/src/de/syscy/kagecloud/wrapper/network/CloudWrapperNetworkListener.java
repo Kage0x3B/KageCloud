@@ -4,10 +4,10 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener.ReflectionListener;
 
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
-import de.syscy.kagecloud.network.packet.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.CreateServerPacket;
-import de.syscy.kagecloud.network.packet.RegisterWrapperPacket;
-import de.syscy.kagecloud.network.packet.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
+import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
+import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
 import de.syscy.kagecloud.wrapper.KageCloudWrapper;
 import lombok.RequiredArgsConstructor;
 

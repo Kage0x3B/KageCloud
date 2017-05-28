@@ -3,7 +3,7 @@ buildscript {
         jcenter()
 		mavenCentral()
     }
-	
+
 	dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
@@ -13,25 +13,71 @@ allprojects {
     apply plugin: "eclipse"
 
     version = '1.0'
-	
+
     ext {
         appName = "KageCloud"
     }
 
     repositories {
 		jcenter()
+		maven { url "http://oss.sonatype.org/content/groups/public/" }
+    }
+}
+
+project(":core") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+	
+	jar {
+	    manifest {
+	        attributes 'Main-Class': 'de.syscy.kagecloud.KageCloudCore'
+	    }
+	}
+
+    dependencies {
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
+
+		compile group: 'org.yaml', name: 'snakeyaml', version: '1.19-SNAPSHOT'
+		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+		compile group: 'com.google.guava', name: 'guava', version: '21.0'
+		compile group: 'commons-io', name: 'commons-io', version: '2.5'
+		compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+		compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
+    }
+}
+
+project(":bungee") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        compile project(":core")
+
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
+
+		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+		compile group: 'commons-io', name: 'commons-io', version: '2.5'
+
+		compile files('libs/waterfall.jar')
     }
 }
 
 project(":wrapper") {
     apply plugin: "java"
 	apply plugin: 'com.github.johnrengelman.shadow'
+	
+	jar {
+	    manifest {
+	        attributes 'Main-Class': 'de.syscy.kagecloud.wrapper.KageCloudWrapper'
+	    }
+	}
 
     dependencies {
         compile project(":core")
-		
+
 		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
-		
+
+		compile group: 'org.yaml', name: 'snakeyaml', version: '1.19-SNAPSHOT'
 		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
 		compile group: 'commons-io', name: 'commons-io', version: '2.5'
     }
@@ -43,23 +89,10 @@ project(":plugin") {
 
     dependencies {
         compile project(":core")
-		
+
 		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
-		
+
 		compile files('libs/spigot-1.11.jar')
-		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
-    }
-}
-
-project(":core") {
-    apply plugin: "java"
-	apply plugin: 'com.github.johnrengelman.shadow'
-
-    dependencies {
-		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
-		
-		compile files('libs/waterfall.jar')
-		
 		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
     }
 }

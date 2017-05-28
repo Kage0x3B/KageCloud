@@ -1,5 +1,5 @@
 wrapperName: Wrapper
-#The core server IP (The same as the BungeeCord IP or localhost if BungeeCord is on the same machine)
+#The core server IP
 coreIP: localhost
 #The port of the core server (in the config of the core server)
 port: 3479

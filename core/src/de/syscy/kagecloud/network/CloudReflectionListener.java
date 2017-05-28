@@ -8,8 +8,11 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import de.syscy.kagecloud.KageCloud;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class CloudReflectionListener extends Listener {
+	private final Class<? extends Connection> connectionClass;
 	private final HashMap<Class<?>, Method> classToMethod = new HashMap<>();
 
 	@Override
@@ -22,13 +25,13 @@ public class CloudReflectionListener extends Listener {
 				return; // Only fail on the first attempt to find the method.
 			}
 			try {
-				method = getClass().getMethod("received", new Class[] { CloudConnection.class, type });
+				method = getClass().getMethod("received", new Class[] { connectionClass, type });
 			} catch(SecurityException ex) {
-				KageCloud.logger.severe("Unable to access method: received(CloudConnection, " + type.getName() + ")");
+				KageCloud.logger.severe("Unable to access method: received(" + connectionClass.getSimpleName() + ", " + type.getName() + ")");
 
 				return;
 			} catch(NoSuchMethodException ex) {
-				KageCloud.logger.fine("Unable to find listener method: " + getClass().getName() + "#received(CloudConnection, " + type.getName() + ")");
+				KageCloud.logger.fine("Unable to find listener method: " + getClass().getName() + "#received(\" + connectionClass.getSimpleName() + \", " + type.getName() + ")");
 
 				return;
 			} finally {
@@ -36,7 +39,7 @@ public class CloudReflectionListener extends Listener {
 			}
 		}
 		try {
-			method.invoke(this, (CloudConnection) connection, object);
+			method.invoke(this, connectionClass.cast(connection), object);
 		} catch(Throwable ex) {
 			if(ex instanceof InvocationTargetException && ex.getCause() != null) {
 				ex = ex.getCause();
@@ -46,7 +49,7 @@ public class CloudReflectionListener extends Listener {
 				throw (RuntimeException) ex;
 			}
 
-			throw new RuntimeException("Error invoking method: " + getClass().getName() + "#received(Connection, " + type.getName() + ")", ex);
+			throw new RuntimeException("Error invoking method: " + getClass().getName() + "#received(\" + connectionClass.getSimpleName() + \", " + type.getName() + ")", ex);
 		}
 	}
 }

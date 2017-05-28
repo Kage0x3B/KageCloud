@@ -2,7 +2,7 @@ package de.syscy.kagecloud.util;
 
 import java.util.List;
 
-import de.syscy.kagecloud.CloudServerInfo;
+import de.syscy.kagecloud.CloudServer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,10 +26,10 @@ public class BasicServerController extends ServerController {
 	@Override
 	public void run() {
 		int availableServers = 0;
-		List<CloudServerInfo> currentServers = getAllCurrentServers();
+		List<CloudServer> currentServers = getAllCurrentServers();
 		int currentServerAmount = currentServers.size();
 
-		for(CloudServerInfo serverInfo : currentServers) {
+		for(CloudServer serverInfo : currentServers) {
 			if(isAvailable(serverInfo)) {
 				availableServers++;
 			}
@@ -44,7 +44,7 @@ public class BasicServerController extends ServerController {
 		}
 	}
 
-	protected boolean isAvailable(CloudServerInfo serverInfo) {
+	protected boolean isAvailable(CloudServer serverInfo) {
 		return !serverInfo.isRestricted() && serverInfo.getPlayers().size() < serverPlayerMaximum;
 	}
 }

@@ -20,7 +20,7 @@ public class CloudPluginClient extends Client {
 	public void connect(String ip, int tcpPort) throws IOException {
 		addListener(new CloudPluginNetworkListener(plugin));
 
-		Packet.registerClasses(getKryo());
+		Packet.registerKryoClasses(getKryo());
 
 		start();
 
