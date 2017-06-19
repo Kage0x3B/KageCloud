@@ -8,6 +8,7 @@ import com.esotericsoftware.kryonet.Listener.ReflectionListener;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.ExecuteCommandPacket;
+import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
@@ -38,5 +39,9 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, ShutdownPacket packet) {
 		Bukkit.shutdown();
+	}
+
+	public void received(Connection connection, PluginDataPacket packet) {
+		plugin.onPluginData(connection, packet);
 	}
 }

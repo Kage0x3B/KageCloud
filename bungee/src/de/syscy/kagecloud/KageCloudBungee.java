@@ -18,14 +18,15 @@ import java.util.logging.Level;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 
-import de.syscy.kagecloud.command.WebInterfaceCommand;
 import de.syscy.kagecloud.event.ServerStartedEvent;
 import de.syscy.kagecloud.event.ServerStoppedEvent;
 import de.syscy.kagecloud.network.CloudProxyNetworkListener;
 import de.syscy.kagecloud.network.packet.Packet;
+import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.util.Charsets;
 import de.syscy.kagecloud.util.CloudReconnectHandler;
+import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
 import lombok.Getter;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -45,6 +46,8 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 	private @Getter String credentials;
 
 	private @Getter Map<UUID, CloudServerInfo> servers = new HashMap<>();
+
+	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
 
 	@Override
 	@SuppressWarnings("deprecation")
@@ -75,7 +78,6 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 		}
 
 		getProxy().setReconnectHandler(new CloudReconnectHandler(this));
-		getProxy().getPluginManager().registerCommand(this, new WebInterfaceCommand(this));
 
 		getProxy().getPluginManager().registerListener(this, new CloudListener(this));
 
@@ -85,6 +87,16 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 	@Override
 	public void onDisable() {
 		client.close();
+	}
+
+	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {
+		pluginDataListeners.put(channel.toLowerCase(), listener);
+	}
+
+	public void onPluginData(Connection sender, PluginDataPacket packet) {
+		if(pluginDataListeners.containsKey(packet.getChannel().toLowerCase())) {
+			pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+		}
 	}
 
 	@SuppressWarnings("deprecation")

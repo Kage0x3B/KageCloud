@@ -4,6 +4,7 @@ import de.syscy.kagecloud.chat.BaseComponent;
 import de.syscy.kagecloud.chat.ComponentSerializer;
 import de.syscy.kagecloud.chat.TextComponent;
 import de.syscy.kagecloud.network.CloudCoreConnection;
+import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.util.ChatMessageType;
@@ -28,7 +29,7 @@ public class CloudPlayer implements CommandSender {
 	 * @param target the new server to connect to
 	 */
 	public void connect(CloudServer target) {
-
+		bungeeCordProxy.sendTCP(new ConnectPlayerPacket(this, target));
 	}
 
 	/**

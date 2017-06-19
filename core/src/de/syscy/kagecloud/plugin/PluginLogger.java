@@ -1,23 +1,25 @@
 package de.syscy.kagecloud.plugin;
 
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import de.syscy.kagecloud.KageCloud;
+
 public class PluginLogger extends Logger {
-	private final String pluginName;
+	private String pluginName;
 
-	protected PluginLogger(Plugin plugin) {
-		super(plugin.getClass().getCanonicalName(), null);
-
-		pluginName = "[" + plugin.getDescription().getName() + "] ";
-
-		setParent(plugin.getCloud().getLogger());
+	public PluginLogger(Plugin context) {
+		super(context.getClass().getCanonicalName(), null);
+		String prefix = context.getDescription().getPrefix();
+		pluginName = prefix != null ? "[" + prefix + "] " : "[" + context.getDescription().getName() + "] ";
+		setParent(KageCloud.logger);
+		setLevel(Level.ALL);
 	}
 
 	@Override
 	public void log(LogRecord logRecord) {
-		logRecord.setMessage(pluginName + logRecord.getMessage());
-
+		logRecord.setMessage(String.valueOf(pluginName) + logRecord.getMessage());
 		super.log(logRecord);
 	}
 }

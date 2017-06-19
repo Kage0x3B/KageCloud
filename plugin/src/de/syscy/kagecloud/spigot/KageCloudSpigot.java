@@ -1,16 +1,22 @@
 package de.syscy.kagecloud.spigot;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.esotericsoftware.kryonet.Connection;
+
 import de.syscy.kagecloud.ICloudNode;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
+import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.spigot.network.CloudPluginClient;
+import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
 import lombok.Getter;
 
@@ -25,6 +31,8 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode, Listener 
 	private @Getter String credentials;
 
 	private @Getter CloudPluginClient client;
+
+	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
 
 	@Override
 	public void onEnable() {
@@ -67,5 +75,15 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode, Listener 
 	public void onDisable() {
 		client.sendTCP(new ChangeStatusPacket(ServerStatus.OFFLINE));
 		client.close();
+	}
+
+	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {
+		pluginDataListeners.put(channel.toLowerCase(), listener);
+	}
+
+	public void onPluginData(Connection sender, PluginDataPacket packet) {
+		if(pluginDataListeners.containsKey(packet.getChannel().toLowerCase())) {
+			pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+		}
 	}
 }

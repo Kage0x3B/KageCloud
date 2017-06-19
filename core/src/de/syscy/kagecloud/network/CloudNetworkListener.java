@@ -6,8 +6,10 @@ import de.syscy.kagecloud.CloudPlayer;
 import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.KageCloudCore;
+import de.syscy.kagecloud.event.ServerStatusChangeEvent;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudConnection.Type;
+import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
@@ -30,6 +32,8 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	@Override
 	public void disconnected(Connection kryoConnection) {
 		CloudCoreConnection connection = (CloudCoreConnection) kryoConnection;
+
+		core.getPluginManager().callEvent(new ServerStatusChangeEvent(connection, ServerStatus.OFFLINE));
 
 		switch(connection.getType()) {
 			case PROXY:
@@ -97,6 +101,8 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	public void received(CloudCoreConnection connection, ChangeStatusPacket packet) {
 		connection.setServerStatus(packet.getStatus());
 
+		core.getPluginManager().callEvent(new ServerStatusChangeEvent(connection, packet.getStatus()));
+
 		if(connection.getType() == Type.PROXY) {
 			if(packet.getStatus() == ServerStatus.OFFLINE) {
 				core.removeProxy(connection.getNodeId());
@@ -145,5 +151,9 @@ public class CloudNetworkListener extends CloudReflectionListener {
 		if(server != null) {
 			server.getPlayers().remove(playerId);
 		}
+	}
+
+	public void received(CloudCoreConnection connection, PluginDataPacket packet) {
+		core.onPluginData(connection, packet);
 	}
 }

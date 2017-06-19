@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,30 +19,46 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import de.syscy.kagecloud.chat.BaseComponent;
+import de.syscy.kagecloud.chat.ComponentSerializer;
+import de.syscy.kagecloud.chat.TextComponent;
+import de.syscy.kagecloud.chat.TextComponentSerializer;
+import de.syscy.kagecloud.chat.TranslatableComponent;
+import de.syscy.kagecloud.chat.TranslatableComponentSerializer;
 import de.syscy.kagecloud.configuration.file.FileConfiguration;
 import de.syscy.kagecloud.configuration.file.YamlConfiguration;
+import de.syscy.kagecloud.event.PlayerConnectEvent;
+import de.syscy.kagecloud.event.PlayerDisconnectEvent;
 import de.syscy.kagecloud.network.CloudConnection;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudCoreConnection;
 import de.syscy.kagecloud.network.KryoServer;
 import de.syscy.kagecloud.network.packet.CreateServerPacket;
+import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
-import de.syscy.kagecloud.plugin.PluginManager;
+import de.syscy.kagecloud.plugin.Plugin;
+import de.syscy.kagecloud.plugin.SimplePluginManager;
+import de.syscy.kagecloud.plugin.java.JavaPluginLoader;
 import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
 import de.syscy.kagecloud.util.BasicServerController;
 import de.syscy.kagecloud.util.Charsets;
+import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.PlayerAmountUpdater;
 import de.syscy.kagecloud.util.ServerController;
 import de.syscy.kagecloud.util.UUID;
 import lombok.Getter;
 
 public class KageCloudCore implements ICloudNode {
+	public static final Gson gson = new GsonBuilder().registerTypeAdapter(BaseComponent.class, new ComponentSerializer()).registerTypeAdapter(TextComponent.class, new TextComponentSerializer()).registerTypeAdapter(TranslatableComponent.class, new TranslatableComponentSerializer()).create();
+
 	private @Getter UUID nodeId = new UUID(0, 0);
 	private @Getter String nodeName = "core";
 
@@ -52,9 +69,9 @@ public class KageCloudCore implements ICloudNode {
 	private KryoServer server;
 	private @Getter String credentials;
 
-	private final @Getter Logger logger;
+	private static final @Getter Logger logger = Logger.getLogger("KageCloud");
 
-	public final @Getter PluginManager pluginManager;
+	private final @Getter SimplePluginManager pluginManager;
 	private final @Getter File pluginsFolder;
 
 	private final @Getter TaskScheduler scheduler = new CloudScheduler();
@@ -71,12 +88,14 @@ public class KageCloudCore implements ICloudNode {
 
 	private @Getter Map<UUID, CloudPlayer> players = new HashMap<>();
 
+	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
+
 	public KageCloudCore() {
 		// Java uses ! to indicate a resource inside of a jar/zip/other container. Running KageCloud from within a directory that has a ! will cause this to muck up.
 		Preconditions.checkState(new File(".").getAbsolutePath().indexOf('!') == -1, "Cannot use KageCloud in zip/jar/other container file.");
 
 		KageCloud.cloudNode = this;
-		KageCloud.logger = logger = Logger.getLogger("KageCloud");
+		KageCloud.logger = logger;
 
 		KageCloud.dataFolder = dataFolder = new File(System.getProperty("user.dir"));
 		getDataFolder().mkdirs();
@@ -84,17 +103,17 @@ public class KageCloudCore implements ICloudNode {
 		pluginsFolder = new File(dataFolder, "plugins");
 		pluginsFolder.mkdirs();
 
-		pluginManager = new PluginManager(this);
-		pluginManager.detectPlugins(pluginsFolder);
-		pluginManager.loadPlugins();
-		pluginManager.enablePlugins();
+		pluginManager = new SimplePluginManager(this);
 
 		configFile = new File(dataFolder, "config.yml");
 		saveDefaultConfig();
 
 		credentials = getConfig().getString("credentials");
 
-		addServerController(new BasicServerController("lobby", 1, 10, 75));
+		loadPlugins();
+		enablePlugins();
+
+		//		addServerController(new BasicServerController("lobby", 1, 10, 75));
 
 		scheduler.schedule(pluginManager.getCorePlugin(), new PlayerAmountUpdater(this), 10, 10, TimeUnit.SECONDS);
 
@@ -108,6 +127,39 @@ public class KageCloudCore implements ICloudNode {
 			ex.printStackTrace();
 
 			System.exit(1);
+		}
+	}
+
+	public void loadPlugins() {
+		pluginManager.registerInterface(JavaPluginLoader.class);
+		if(pluginsFolder.exists()) {
+			Arrays.stream(pluginManager.loadPlugins(pluginsFolder)).forEach(p -> {
+				try {
+					String message = String.format("Loading %s", p.getDescription().getFullName());
+					p.getLogger().info(message);
+					p.onLoad();
+				} catch(Throwable ex) {
+					KageCloud.logger.log(Level.SEVERE, String.valueOf(ex.getMessage()) + " initializing " + p.getDescription().getFullName() + " (Is it up to date?)", ex);
+				}
+			});
+		} else {
+			pluginsFolder.mkdir();
+		}
+	}
+
+	public void enablePlugins() {
+		Arrays.stream(pluginManager.getPlugins()).forEach(p -> enablePlugin(p));
+	}
+
+	public void disablePlugins() {
+		pluginManager.disablePlugins();
+	}
+
+	private void enablePlugin(Plugin plugin) {
+		try {
+			pluginManager.enablePlugin(plugin);
+		} catch(Throwable ex) {
+			KageCloud.logger.log(Level.SEVERE, String.valueOf(ex.getMessage()) + " loading " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
 		}
 	}
 
@@ -141,6 +193,8 @@ public class KageCloudCore implements ICloudNode {
 	public void onPlayerJoin(CloudCoreConnection proxyConnection, PlayerJoinNetworkPacket packet) {
 		CloudPlayer player = new CloudPlayer(UUID.fromString(packet.getId()), packet.getName(), packet.getVersion(), proxyConnection);
 		players.put(player.getId(), player);
+
+		pluginManager.callEvent(new PlayerConnectEvent(player));
 	}
 
 	public void onPlayerLeave(PlayerLeaveNetworkPacket packet) {
@@ -148,7 +202,18 @@ public class KageCloudCore implements ICloudNode {
 		CloudPlayer player = players.remove(id);
 
 		if(player != null && player.getCurrentServer() != null) {
+			pluginManager.callEvent(new PlayerDisconnectEvent(player));
 			player.getCurrentServer().getPlayers().remove(id);
+		}
+	}
+
+	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {
+		pluginDataListeners.put(channel.toLowerCase(), listener);
+	}
+
+	public void onPluginData(CloudCoreConnection sender, PluginDataPacket packet) {
+		if(pluginDataListeners.containsKey(packet.getChannel().toLowerCase())) {
+			pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
 		}
 	}
 
@@ -314,7 +379,7 @@ public class KageCloudCore implements ICloudNode {
 	public void reloadConfig() {
 		config = YamlConfiguration.loadConfiguration(configFile);
 
-		final InputStream defConfigStream = getResource("/config.yml");
+		final InputStream defConfigStream = getResource("/coreconfig.yml");
 
 		if(defConfigStream == null) {
 			KageCloud.logger.warning("No default config included");
@@ -335,7 +400,7 @@ public class KageCloudCore implements ICloudNode {
 
 	public void saveDefaultConfig() {
 		if(!configFile.exists()) {
-			saveResource("/config.yml", false);
+			saveResource("/coreconfig.yml", false);
 		}
 	}
 
