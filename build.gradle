@@ -92,7 +92,7 @@ project(":plugin") {
 
 		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.2'
 
-		compile files('libs/spigot-1.11.jar')
+		compile files('libs/spigot-1.12.jar')
 		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
     }
 }
