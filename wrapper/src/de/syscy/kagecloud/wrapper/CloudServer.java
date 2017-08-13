@@ -27,6 +27,7 @@ public class CloudServer {
 	private @Getter Process process;
 
 	private @Getter File serverFolder;
+	private File pluginsFolder;
 
 	public CloudServer(KageCloudWrapper wrapper, ServerTemplate template) {
 		this.wrapper = wrapper;
@@ -41,9 +42,20 @@ public class CloudServer {
 		serverFolder = new File(wrapper.getServersDirectory(), serverId.toString());
 		serverFolder.mkdirs();
 
-		File pluginsFolder = new File(serverFolder, "plugins");
+		pluginsFolder = new File(serverFolder, "plugins");
 		pluginsFolder.mkdirs();
 
+		copyPlugins();
+		copyTemplates();
+
+		try {
+			FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public void copyPlugins() {
 		List<String> pluginNames = template.getPlugins();
 
 		for(File pluginFile : wrapper.getGlobalPluginDirectory().listFiles(new JARFileFilter())) {
@@ -61,11 +73,11 @@ public class CloudServer {
 				}
 			}
 		}
+	}
 
+	public void copyTemplates() {
 		try {
 			FileUtils.copyDirectory(template.getTemplateDirectory(), serverFolder);
-
-			FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}

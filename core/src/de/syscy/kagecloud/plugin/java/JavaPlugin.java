@@ -26,6 +26,7 @@ import de.syscy.kagecloud.plugin.PluginLogger;
 import de.syscy.kagecloud.scheduler.GroupedThreadFactory;
 import de.syscy.kagecloud.util.Validate;
 
+@SuppressWarnings("deprecation")
 public class JavaPlugin extends PluginBase {
 	private boolean isEnabled = false;
 	private PluginLoader loader = null;

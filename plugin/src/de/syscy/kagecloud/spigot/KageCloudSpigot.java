@@ -15,6 +15,7 @@ import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
+import de.syscy.kagecloud.spigot.command.CloudCommandManager;
 import de.syscy.kagecloud.spigot.network.CloudPluginClient;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
@@ -69,6 +70,10 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode, Listener 
 		}
 
 		Bukkit.getPluginManager().registerEvents(this, this);
+
+		CloudCommandManager cloudCommandManager = new CloudCommandManager(this);
+		getCommand("cloud").setExecutor(cloudCommandManager);
+		getCommand("cloud").setTabCompleter(cloudCommandManager);
 	}
 
 	@Override

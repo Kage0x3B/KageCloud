@@ -126,12 +126,7 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 	public List<CloudServerInfo> getJoinableLobbyServers(ProxiedPlayer player) {
 		List<CloudServerInfo> joinableServers = new ArrayList<>();
-
-		for(CloudServerInfo serverInfo : servers.values()) {
-			if(serverInfo.isLobby() && serverInfo.canAccess(player)) {
-				joinableServers.add(serverInfo);
-			}
-		}
+		servers.values().parallelStream().filter(s -> s.isLobby() && s.canAccess(player)).forEach(s -> joinableServers.add(s));
 
 		return joinableServers;
 	}

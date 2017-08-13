@@ -1,11 +1,14 @@
 package de.syscy.kagecloud.network.packet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
+import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
+import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
@@ -20,6 +23,7 @@ import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
+import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.UUID;
 
@@ -33,6 +37,7 @@ public class Packet {
 		kryo.register(RegisterServerPacket.class);
 		kryo.register(ChangeStatusPacket.class);
 		kryo.register(ShutdownPacket.class);
+		kryo.register(ReloadServerPacket.class);
 
 		kryo.register(PlayerJoinNetworkPacket.class);
 		kryo.register(PlayerJoinServerPacket.class);
@@ -46,6 +51,8 @@ public class Packet {
 		kryo.register(RemoveServerPacket.class);
 
 		kryo.register(PlayerAmountPacket.class);
+		kryo.register(RequestServerListPacket.class);
+		kryo.register(ServerListPacket.class);
 
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());
 
@@ -53,5 +60,8 @@ public class Packet {
 		kryo.register(ServerStatus.class);
 		kryo.register(ChatMessageType.class);
 		kryo.register(HashMap.class);
+		kryo.register(ArrayList.class);
+
+		kryo.register(ServerListPacket.Server.class);
 	}
 }

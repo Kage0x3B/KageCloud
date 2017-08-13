@@ -1,5 +1,8 @@
 package de.syscy.kagecloud.spigot.network;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -9,15 +12,20 @@ import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.ExecuteCommandPacket;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
+import de.syscy.kagecloud.network.packet.info.IDPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
+import de.syscy.kagecloud.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CloudPluginNetworkListener extends ReflectionListener {
 	private final KageCloudSpigot plugin;
+
+	private Map<UUID, IDPacketListener<?>> idPacketListeners = new HashMap<>();
 
 	@Override
 	public void connected(final Connection connection) {
@@ -33,15 +41,52 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 		});
 	}
 
+	@Override
+	public void received(Connection connection, Object object) {
+		super.received(connection, object);
+
+		if(object instanceof IDPacket) {
+			IDPacket packet = (IDPacket) object;
+
+			KageCloud.logger.info("Received " + packet);
+			IDPacketListener<?> listener = idPacketListeners.remove(packet.getId());
+
+			if(listener != null) {
+				KageCloud.logger.info("listener found for " + packet);
+				listener.received0(connection, packet);
+			}
+		}
+	}
+
+	public void received(Connection connection, IDPacket packet) {
+	}
+
 	public void received(Connection connection, ExecuteCommandPacket packet) {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), packet.getCommand());
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {
-		Bukkit.shutdown();
+		Bukkit.getScheduler().runTask(plugin, () -> Bukkit.shutdown());
+	}
+
+	public void received(Connection connection, ReloadServerPacket packet) {
+		Bukkit.getScheduler().runTask(plugin, () -> Bukkit.reload());
 	}
 
 	public void received(Connection connection, PluginDataPacket packet) {
 		plugin.onPluginData(connection, packet);
+	}
+
+	public void addIDPacketListener(IDPacket packet, IDPacketListener<?> listener) {
+		idPacketListeners.put(packet.generateID(), listener);
+	}
+
+	public static interface IDPacketListener<T extends IDPacket> {
+		@SuppressWarnings("unchecked")
+		default public void received0(Connection connection, IDPacket packet) {
+			received(connection, (T) packet);
+		};
+
+		public void received(Connection connection, T packet);
 	}
 }

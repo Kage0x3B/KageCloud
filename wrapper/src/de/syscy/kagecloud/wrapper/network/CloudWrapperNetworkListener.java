@@ -8,6 +8,8 @@ import de.syscy.kagecloud.network.packet.CreateServerPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
+import de.syscy.kagecloud.wrapper.CloudServer;
 import de.syscy.kagecloud.wrapper.KageCloudWrapper;
 import lombok.RequiredArgsConstructor;
 
@@ -32,5 +34,14 @@ public class CloudWrapperNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, ShutdownPacket packet) {
 		wrapper.shutdown();
+	}
+
+	public void received(Connection connection, ReloadServerPacket packet) {
+		CloudServer server = wrapper.getServers().values().parallelStream().filter(s -> s.getServerName().equalsIgnoreCase(packet.getServerName())).findAny().orElse(null);
+
+		if(server != null) {
+			server.copyPlugins();
+			server.copyTemplates();
+		}
 	}
 }

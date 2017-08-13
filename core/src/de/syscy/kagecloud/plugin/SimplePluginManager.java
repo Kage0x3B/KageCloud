@@ -144,7 +144,7 @@ public final class SimplePluginManager implements PluginManager {
 					if((loadBeforeSet = description.getLoadBefore()) != null && !loadBeforeSet.isEmpty()) {
 						for(String loadBeforeTarget : loadBeforeSet) {
 							if(softDependencies.containsKey(loadBeforeTarget)) {
-								((Collection) softDependencies.get(loadBeforeTarget)).add(description.getName());
+								((Collection<String>) softDependencies.get(loadBeforeTarget)).add(description.getName());
 								continue;
 							}
 							LinkedList<String> shortSoftDependency = new LinkedList<String>();
@@ -160,92 +160,122 @@ public final class SimplePluginManager implements PluginManager {
 			String plugin;
 			File file;
 			boolean missingDependency = true;
-			Iterator pluginIterator = plugins.keySet().iterator();
+			Iterator<String> pluginIterator = plugins.keySet().iterator();
+
 			while(pluginIterator.hasNext()) {
 				plugin = (String) pluginIterator.next();
+
 				if(dependencies.containsKey(plugin)) {
-					Iterator dependencyIterator = ((Collection) dependencies.get(plugin)).iterator();
+					Iterator<String> dependencyIterator = dependencies.get(plugin).iterator();
+
 					while(dependencyIterator.hasNext()) {
 						String dependency = (String) dependencyIterator.next();
+
 						if(loadedPlugins.contains(dependency)) {
 							dependencyIterator.remove();
 							continue;
 						}
+
 						if(plugins.containsKey(dependency)) {
 							continue;
 						}
+
 						missingDependency = false;
-						File file2 = (File) plugins.get(plugin);
+						File file2 = plugins.get(plugin);
 						pluginIterator.remove();
 						softDependencies.remove(plugin);
 						dependencies.remove(plugin);
+
 						KageCloud.logger.log(Level.SEVERE, "Could not load '" + file2.getPath() + "' in folder '" + directory.getPath() + "'", new UnknownDependencyException(dependency));
+
 						break;
 					}
-					if(dependencies.containsKey(plugin) && ((Collection) dependencies.get(plugin)).isEmpty()) {
+
+					if(dependencies.containsKey(plugin) && ((Collection<String>) dependencies.get(plugin)).isEmpty()) {
 						dependencies.remove(plugin);
 					}
 				}
+
 				if(softDependencies.containsKey(plugin)) {
-					Iterator softDependencyIterator = ((Collection) softDependencies.get(plugin)).iterator();
+					Iterator<String> softDependencyIterator = softDependencies.get(plugin).iterator();
+
 					while(softDependencyIterator.hasNext()) {
 						String softDependency = (String) softDependencyIterator.next();
+
 						if(plugins.containsKey(softDependency)) {
 							continue;
 						}
+
 						softDependencyIterator.remove();
 					}
-					if(((Collection) softDependencies.get(plugin)).isEmpty()) {
+
+					if(softDependencies.get(plugin).isEmpty()) {
 						softDependencies.remove(plugin);
 					}
 				}
+
 				if(dependencies.containsKey(plugin) || softDependencies.containsKey(plugin) || !plugins.containsKey(plugin)) {
 					continue;
 				}
+
 				file = (File) plugins.get(plugin);
 				pluginIterator.remove();
 				missingDependency = false;
+
 				try {
 					result.add(loadPlugin(file));
 					loadedPlugins.add(plugin);
+
 					continue;
 				} catch(InvalidPluginException ex) {
 					KageCloud.logger.log(Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex);
 				}
 			}
+
 			if(!missingDependency) {
 				continue;
 			}
+
 			pluginIterator = plugins.keySet().iterator();
+
 			while(pluginIterator.hasNext()) {
 				plugin = (String) pluginIterator.next();
+
 				if(dependencies.containsKey(plugin)) {
 					continue;
 				}
+
 				softDependencies.remove(plugin);
 				missingDependency = false;
 				file = (File) plugins.get(plugin);
 				pluginIterator.remove();
+
 				try {
 					result.add(loadPlugin(file));
 					loadedPlugins.add(plugin);
+
 					break;
 				} catch(InvalidPluginException ex) {
 					KageCloud.logger.log(Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex);
 				}
 			}
+
 			if(!missingDependency) {
 				continue;
 			}
+
 			softDependencies.clear();
 			dependencies.clear();
 			Iterator<File> failedPluginIterator = plugins.values().iterator();
+
 			while(failedPluginIterator.hasNext()) {
 				file = (File) failedPluginIterator.next();
 				failedPluginIterator.remove();
+
 				KageCloud.logger.log(Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "': circular dependency detected");
 			}
 		}
+
 		return result.toArray(new Plugin[result.size()]);
 	}
 
@@ -254,19 +284,23 @@ public final class SimplePluginManager implements PluginManager {
 		Validate.notNull(file, "File cannot be null");
 		Set<Pattern> filters = fileAssociations.keySet();
 		Plugin result = null;
+
 		for(Pattern filter : filters) {
-			String name;
-			Matcher match = filter.matcher(name = file.getName());
+			Matcher match = filter.matcher(file.getName());
+
 			if(!match.find()) {
 				continue;
 			}
+
 			PluginLoader loader = fileAssociations.get(filter);
 			result = loader.loadPlugin(file);
 		}
+
 		if(result != null) {
 			plugins.add(result);
 			lookupNames.put(result.getDescription().getName(), result);
 		}
+
 		return result;
 	}
 
@@ -283,6 +317,7 @@ public final class SimplePluginManager implements PluginManager {
 	@Override
 	public boolean isPluginEnabled(String name) {
 		Plugin plugin = getPlugin(name);
+
 		return this.isPluginEnabled(plugin);
 	}
 
@@ -291,6 +326,7 @@ public final class SimplePluginManager implements PluginManager {
 		if(plugin != null && plugins.contains(plugin)) {
 			return plugin.isEnabled();
 		}
+
 		return false;
 	}
 
@@ -309,6 +345,7 @@ public final class SimplePluginManager implements PluginManager {
 	public void disablePlugins() {
 		Plugin[] plugins = getPlugins();
 		int i2 = plugins.length - 1;
+
 		while(i2 >= 0) {
 			disablePlugin(plugins[i2]);
 			--i2;
@@ -362,8 +399,8 @@ public final class SimplePluginManager implements PluginManager {
 
 		long start = System.nanoTime();
 		eventManager.fire(event);
-
 		long elapsed = System.nanoTime() - start;
+
 		if(elapsed > 250000000) {
 			KageCloud.logger.log(Level.WARNING, "Event {0} took {1}ns to process!", new Object[] { event, elapsed });
 		}

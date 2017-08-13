@@ -16,11 +16,14 @@ allprojects {
 
     ext {
         appName = "KageCloud"
+        
+        kageCoreVersion = '6f23cb1bcb'
     }
 
     repositories {
 		jcenter()
 		maven { url "http://oss.sonatype.org/content/groups/public/" }
+		maven { url "https://jitpack.io" }
     }
 }
 
@@ -94,6 +97,7 @@ project(":plugin") {
 
 		compile files('libs/spigot-1.12.jar')
 		compile group: 'com.esotericsoftware', name: 'kryonet', version: '2.22.0-RC1'
+		compile "com.github.Kage0x3B:KageCore:$kageCoreVersion"
     }
 }
 

@@ -45,7 +45,7 @@ public class KageCloudWrapper implements ICloudNode {
 
 	private int portCounter = 15000;
 
-	private Map<UUID, CloudServer> servers = new HashMap<>();
+	private @Getter Map<UUID, CloudServer> servers = new HashMap<>();
 	private @Getter List<String> globalPlugins;
 
 	public KageCloudWrapper() {

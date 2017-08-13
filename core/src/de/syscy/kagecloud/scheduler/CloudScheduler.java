@@ -24,7 +24,6 @@ public class CloudScheduler implements TaskScheduler {
 
 	private final Unsafe unsafe = new Unsafe() {
 		@Override
-		@SuppressWarnings("deprecation")
 		public ExecutorService getExecutorService(Plugin plugin) {
 			return plugin.getExecutorService();
 		}
@@ -53,12 +52,15 @@ public class CloudScheduler implements TaskScheduler {
 	@Override
 	public int cancel(Plugin plugin) {
 		Set<ScheduledTask> toRemove = new HashSet<>();
+
 		for(ScheduledTask task : tasksByPlugin.get(plugin)) {
 			toRemove.add(task);
 		}
+
 		for(ScheduledTask task : toRemove) {
 			cancel(task);
 		}
+
 		return toRemove.size();
 	}
 
@@ -72,11 +74,11 @@ public class CloudScheduler implements TaskScheduler {
 		return schedule(owner, task, delay, 0, unit);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ScheduledTask schedule(Plugin owner, Runnable task, long delay, long period, TimeUnit unit) {
 		Preconditions.checkNotNull(owner, "owner");
 		Preconditions.checkNotNull(task, "task");
+
 		CloudTask prepared = new CloudTask(this, taskCounter.getAndIncrement(), owner, task, delay, period, unit);
 
 		synchronized(lock) {
@@ -85,6 +87,7 @@ public class CloudScheduler implements TaskScheduler {
 		}
 
 		owner.getExecutorService().execute(prepared);
+
 		return prepared;
 	}
 
