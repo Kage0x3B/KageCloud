@@ -3,8 +3,6 @@ package de.syscy.kagecloud.network.packet;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.esotericsoftware.kryo.Kryo;
-
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
@@ -26,6 +24,8 @@ import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.UUID;
+
+import com.esotericsoftware.kryo.Kryo;
 
 public class Packet {
 	public static void registerKryoClasses(Kryo kryo) {
@@ -54,6 +54,7 @@ public class Packet {
 		kryo.register(RequestServerListPacket.class);
 		kryo.register(ServerListPacket.class);
 
+		kryo.register(RelayPacket.class);
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());
 
 		kryo.register(UUID.class, new UUID.UUIDSerializer());
