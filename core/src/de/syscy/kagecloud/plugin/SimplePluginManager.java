@@ -16,16 +16,17 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.eventbus.Subscribe;
-
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.KageCloudCore;
 import de.syscy.kagecloud.event.EventManager;
 import de.syscy.kagecloud.plugin.java.JavaPlugin;
 import de.syscy.kagecloud.util.Validate;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.eventbus.Subscribe;
+
 import lombok.Getter;
 
 public final class SimplePluginManager implements PluginManager {
@@ -34,9 +35,9 @@ public final class SimplePluginManager implements PluginManager {
 	private final @Getter JavaPlugin corePlugin;
 
 	private final EventManager eventManager;
-	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
-	private final List<Plugin> plugins = new ArrayList<Plugin>();
-	private final Map<String, Plugin> lookupNames = new HashMap<String, Plugin>();
+	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
+	private final List<Plugin> plugins = new ArrayList<>();
+	private final Map<String, Plugin> lookupNames = new HashMap<>();
 	private final Multimap<Plugin, Listener> listenersByPlugin = ArrayListMultimap.create();
 	private boolean useTimings = false;
 
@@ -84,11 +85,11 @@ public final class SimplePluginManager implements PluginManager {
 	public Plugin[] loadPlugins(File directory) {
 		Validate.notNull(directory, "Directory cannot be null");
 		Validate.isTrue(directory.isDirectory(), "Directory must be a directory");
-		ArrayList<Plugin> result = new ArrayList<Plugin>();
+		ArrayList<Plugin> result = new ArrayList<>();
 		Set<Pattern> filters = fileAssociations.keySet();
-		HashMap<String, File> plugins = new HashMap<String, File>();
-		HashSet<String> loadedPlugins = new HashSet<String>();
-		HashMap<String, LinkedList<String>> dependencies = new HashMap<String, LinkedList<String>>();
+		HashMap<String, File> plugins = new HashMap<>();
+		HashSet<String> loadedPlugins = new HashSet<>();
+		HashMap<String, LinkedList<String>> dependencies = new HashMap<>();
 		HashMap<String, List<String>> softDependencies = new HashMap<>();
 		File[] arrfile = directory.listFiles();
 		int n = arrfile.length;
@@ -135,11 +136,11 @@ public final class SimplePluginManager implements PluginManager {
 						if(softDependencies.containsKey(description.getName())) {
 							softDependencies.get(description.getName()).addAll(softDependencySet);
 						} else {
-							softDependencies.put(description.getName(), new LinkedList<String>(softDependencySet));
+							softDependencies.put(description.getName(), new LinkedList<>(softDependencySet));
 						}
 					}
 					if((dependencySet = description.getDepend()) != null && !dependencySet.isEmpty()) {
-						dependencies.put(description.getName(), new LinkedList<String>(dependencySet));
+						dependencies.put(description.getName(), new LinkedList<>(dependencySet));
 					}
 					if((loadBeforeSet = description.getLoadBefore()) != null && !loadBeforeSet.isEmpty()) {
 						for(String loadBeforeTarget : loadBeforeSet) {
@@ -147,7 +148,7 @@ public final class SimplePluginManager implements PluginManager {
 								((Collection<String>) softDependencies.get(loadBeforeTarget)).add(description.getName());
 								continue;
 							}
-							LinkedList<String> shortSoftDependency = new LinkedList<String>();
+							LinkedList<String> shortSoftDependency = new LinkedList<>();
 							shortSoftDependency.add(description.getName());
 							softDependencies.put(loadBeforeTarget, shortSoftDependency);
 						}

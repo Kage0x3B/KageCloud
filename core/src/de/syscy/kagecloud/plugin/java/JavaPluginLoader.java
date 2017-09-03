@@ -14,8 +14,6 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import org.yaml.snakeyaml.error.YAMLException;
-
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.KageCloudCore;
 import de.syscy.kagecloud.configuration.serialization.ConfigurationSerializable;
@@ -28,11 +26,13 @@ import de.syscy.kagecloud.plugin.PluginLoader;
 import de.syscy.kagecloud.plugin.UnknownDependencyException;
 import de.syscy.kagecloud.util.Validate;
 
+import org.yaml.snakeyaml.error.YAMLException;
+
 public final class JavaPluginLoader implements PluginLoader {
 	final KageCloudCore cloud;
 	private final Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$") };
 	private final Map<String, Class<?>> classes = new ConcurrentHashMap<>();
-	private final List<PluginClassLoader> loaders = new CopyOnWriteArrayList<PluginClassLoader>();
+	private final List<PluginClassLoader> loaders = new CopyOnWriteArrayList<>();
 
 	@Deprecated
 	public JavaPluginLoader(KageCloudCore cloud) {

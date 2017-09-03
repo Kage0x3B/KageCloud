@@ -14,7 +14,7 @@ import com.google.gson.JsonParseException;
 public class ComponentSerializer implements JsonDeserializer<BaseComponent> {
 	private final static Gson gson = new GsonBuilder().registerTypeAdapter(BaseComponent.class, new ComponentSerializer()).registerTypeAdapter(TextComponent.class, new TextComponentSerializer()).registerTypeAdapter(TranslatableComponent.class, new TranslatableComponentSerializer()).create();
 
-	public final static ThreadLocal<HashSet<BaseComponent>> serializedComponents = new ThreadLocal<HashSet<BaseComponent>>();
+	public final static ThreadLocal<HashSet<BaseComponent>> serializedComponents = new ThreadLocal<>();
 
 	public static BaseComponent[] parse(String json) {
 		if(json.startsWith("[")) { //Array

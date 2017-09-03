@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.syscy.kagecloud.util.ChatColor;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +26,7 @@ public class TextComponent extends BaseComponent {
 	 * @return the components needed to print the message to the client
 	 */
 	public static BaseComponent[] fromLegacyText(String message) {
-		ArrayList<BaseComponent> components = new ArrayList<BaseComponent>();
+		ArrayList<BaseComponent> components = new ArrayList<>();
 		StringBuilder builder = new StringBuilder();
 		TextComponent component = new TextComponent();
 		Matcher matcher = url.matcher(message);
@@ -144,7 +145,7 @@ public class TextComponent extends BaseComponent {
 	 */
 	public TextComponent(BaseComponent... extras) {
 		setText("");
-		setExtra(new ArrayList<BaseComponent>(Arrays.asList(extras)));
+		setExtra(new ArrayList<>(Arrays.asList(extras)));
 	}
 
 	/**

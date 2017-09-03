@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.syscy.kagecloud.util.ChatColor;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,7 +42,7 @@ public class TranslatableComponent extends BaseComponent {
 		setTranslate(original.getTranslate());
 
 		if(original.getWith() != null) {
-			List<BaseComponent> temp = new ArrayList<BaseComponent>();
+			List<BaseComponent> temp = new ArrayList<>();
 			for(BaseComponent baseComponent : original.getWith()) {
 				temp.add(baseComponent.duplicate());
 			}
@@ -61,7 +62,7 @@ public class TranslatableComponent extends BaseComponent {
 	 */
 	public TranslatableComponent(String translate, Object... with) {
 		setTranslate(translate);
-		List<BaseComponent> temp = new ArrayList<BaseComponent>();
+		List<BaseComponent> temp = new ArrayList<>();
 		for(Object w : with) {
 			if(w instanceof String) {
 				temp.add(new TextComponent((String) w));
@@ -113,7 +114,7 @@ public class TranslatableComponent extends BaseComponent {
 	 */
 	public void addWith(BaseComponent component) {
 		if(with == null) {
-			with = new ArrayList<BaseComponent>();
+			with = new ArrayList<>();
 		}
 		component.parent = this;
 		with.add(component);

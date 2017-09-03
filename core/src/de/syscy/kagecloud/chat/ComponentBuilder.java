@@ -25,7 +25,7 @@ import de.syscy.kagecloud.util.ChatColor;
  */
 public class ComponentBuilder {
 	private TextComponent current;
-	private final List<BaseComponent> parts = new ArrayList<BaseComponent>();
+	private final List<BaseComponent> parts = new ArrayList<>();
 
 	/**
 	 * Creates a ComponentBuilder from the other given ComponentBuilder to clone

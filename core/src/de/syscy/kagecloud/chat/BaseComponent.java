@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.syscy.kagecloud.util.ChatColor;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -298,7 +299,7 @@ public abstract class BaseComponent {
 	 */
 	public void addExtra(BaseComponent component) {
 		if(extra == null) {
-			extra = new ArrayList<BaseComponent>();
+			extra = new ArrayList<>();
 		}
 		component.parent = this;
 		extra.add(component);

@@ -195,7 +195,7 @@ public final class PluginDescriptionFile {
 	}
 
 	private Map<String, Object> saveMap() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		map.put("name", name);
 		map.put("main", main);
 		map.put("version", version);
