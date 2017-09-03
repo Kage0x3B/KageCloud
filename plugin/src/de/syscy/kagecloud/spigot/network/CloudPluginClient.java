@@ -2,13 +2,14 @@ package de.syscy.kagecloud.spigot.network;
 
 import java.io.IOException;
 
-import com.esotericsoftware.kryonet.Client;
-
 import de.syscy.kagecloud.KageCloud;
+import de.syscy.kagecloud.network.ChunkedPacketListener;
 import de.syscy.kagecloud.network.packet.Packet;
 import de.syscy.kagecloud.network.packet.info.IDPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
 import de.syscy.kagecloud.spigot.network.CloudPluginNetworkListener.IDPacketListener;
+
+import com.esotericsoftware.kryonet.Client;
 
 public class CloudPluginClient extends Client {
 	private final KageCloudSpigot plugin;
@@ -21,7 +22,9 @@ public class CloudPluginClient extends Client {
 	}
 
 	public void connect(String ip, int tcpPort) throws IOException {
-		addListener(mainListener = new CloudPluginNetworkListener(plugin));
+		mainListener = new CloudPluginNetworkListener(plugin);
+		addListener(new ChunkedPacketListener(mainListener));
+		addListener(mainListener);
 
 		Packet.registerKryoClasses(getKryo());
 

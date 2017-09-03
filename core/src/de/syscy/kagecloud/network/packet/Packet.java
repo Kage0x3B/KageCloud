@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
+import de.syscy.kagecloud.network.CloudConnection.Type;
 import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket;
@@ -56,10 +57,12 @@ public class Packet {
 
 		kryo.register(RelayPacket.class);
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());
+		kryo.register(ChunkedPacket.class, new ChunkedPacket.ChunkedPacketSerializer());
 
 		kryo.register(UUID.class, new UUID.UUIDSerializer());
 		kryo.register(ServerStatus.class);
 		kryo.register(ChatMessageType.class);
+		kryo.register(Type.class);
 		kryo.register(HashMap.class);
 		kryo.register(ArrayList.class);
 

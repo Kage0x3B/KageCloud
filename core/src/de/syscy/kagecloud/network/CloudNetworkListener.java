@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.esotericsoftware.kryonet.Connection;
-
 import de.syscy.kagecloud.CloudPlayer;
 import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.KageCloud;
@@ -30,6 +28,8 @@ import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.UUID;
+
+import com.esotericsoftware.kryonet.Connection;
 
 public class CloudNetworkListener extends CloudReflectionListener {
 	private final KageCloudCore core;
@@ -195,14 +195,14 @@ public class CloudNetworkListener extends CloudReflectionListener {
 					if(byID) {
 						receiverList.add(core.getBungeeCordProxies().get(id));
 					} else {
-						core.getBungeeCordProxies().values().parallelStream().filter(c -> c.getName().equalsIgnoreCase(name)).forEach(c -> receiverList.add(c));
+						core.getBungeeCordProxies().values().parallelStream().filter(p -> p.getName().equalsIgnoreCase(name)).forEach(p -> receiverList.add(p));
 					}
 					break;
 				case WRAPPER:
 					if(byID) {
 						receiverList.add(core.getWrappers().get(id));
 					} else {
-						core.getBungeeCordProxies().values().parallelStream().filter(c -> c.getName().equalsIgnoreCase(name)).forEach(c -> receiverList.add(c));
+						core.getBungeeCordProxies().values().parallelStream().filter(w -> w.getName().equalsIgnoreCase(name)).forEach(w -> receiverList.add(w));
 					}
 					break;
 				case SERVER:
@@ -210,7 +210,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 						CloudServer server = core.getServers().get(id);
 						receiverList.add(server != null ? server.getConnection() : null);
 					} else {
-						core.getBungeeCordProxies().values().parallelStream().filter(c -> c.getName().equalsIgnoreCase(name)).forEach(c -> receiverList.add(c));
+						core.getServers().values().parallelStream().filter(s -> s.getName().equalsIgnoreCase(name)).forEach(s -> receiverList.add(s.getConnection()));
 					}
 					break;
 				default:

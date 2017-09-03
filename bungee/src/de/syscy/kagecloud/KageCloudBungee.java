@@ -15,11 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
-
 import de.syscy.kagecloud.event.ServerStartedEvent;
 import de.syscy.kagecloud.event.ServerStoppedEvent;
+import de.syscy.kagecloud.network.ChunkedPacketListener;
 import de.syscy.kagecloud.network.CloudProxyNetworkListener;
 import de.syscy.kagecloud.network.packet.Packet;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
@@ -28,6 +26,11 @@ import de.syscy.kagecloud.util.Charsets;
 import de.syscy.kagecloud.util.CloudReconnectHandler;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
+
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+
 import lombok.Getter;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -63,7 +66,9 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 		client = new Client();
 		Packet.registerKryoClasses(client.getKryo());
-		client.addListener(new CloudProxyNetworkListener(this));
+		Listener listener = new CloudProxyNetworkListener(this);
+		client.addListener(new ChunkedPacketListener(listener));
+		client.addListener(listener);
 
 		client.start();
 
