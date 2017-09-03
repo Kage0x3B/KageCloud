@@ -3,11 +3,6 @@ package de.syscy.kagecloud.spigot.network;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
-
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener.ReflectionListener;
-
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.ExecuteCommandPacket;
@@ -19,6 +14,12 @@ import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
 import de.syscy.kagecloud.util.UUID;
+
+import org.bukkit.Bukkit;
+
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener.ReflectionListener;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -66,11 +67,15 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {
-		Bukkit.getScheduler().runTask(plugin, () -> Bukkit.shutdown());
+		if(plugin.isEnabled()) {
+			Bukkit.getScheduler().runTask(plugin, () -> Bukkit.shutdown());
+		}
 	}
 
 	public void received(Connection connection, ReloadServerPacket packet) {
-		Bukkit.getScheduler().runTask(plugin, () -> Bukkit.reload());
+		if(plugin.isEnabled()) {
+			Bukkit.getScheduler().runTask(plugin, () -> Bukkit.reload());
+		}
 	}
 
 	public void received(Connection connection, PluginDataPacket packet) {
