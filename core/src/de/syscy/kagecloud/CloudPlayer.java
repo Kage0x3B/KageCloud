@@ -10,6 +10,7 @@ import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.ProtocolConstants;
 import de.syscy.kagecloud.util.UUID;
+
 import lombok.Data;
 
 @Data
@@ -30,6 +31,14 @@ public class CloudPlayer implements CommandSender {
 	 */
 	public void connect(CloudServer target) {
 		bungeeCordProxy.sendTCP(new ConnectPlayerPacket(this, target));
+	}
+
+	/**
+	 * Connects / transfers this user to an available server of the specified template.
+	 * @param templateName
+	 */
+	public void connect(String templateName) {
+		bungeeCordProxy.sendTCP(new ConnectPlayerPacket(getName(), templateName, false));
 	}
 
 	/**

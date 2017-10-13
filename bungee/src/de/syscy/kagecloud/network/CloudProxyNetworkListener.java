@@ -1,10 +1,9 @@
 package de.syscy.kagecloud.network;
 
+import java.util.Optional;
 import java.util.UUID;
 
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener.ReflectionListener;
-
+import de.syscy.kagecloud.CloudServerInfo;
 import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
@@ -16,6 +15,10 @@ import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
+
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener.ReflectionListener;
+
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatMessageType;
@@ -68,10 +71,20 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, ConnectPlayerPacket packet) {
 		ProxiedPlayer player = BungeeCord.getInstance().getPlayer(UUID.fromString(packet.getPlayerId()));
-		ServerInfo server = BungeeCord.getInstance().getServerInfo(packet.getServerName());
 
-		if(player != null && server != null) {
-			player.connect(server);
+		if(packet.isExactServer()) {
+			ServerInfo server = BungeeCord.getInstance().getServerInfo(packet.getServerName());
+
+			if(player != null && server != null) {
+				player.connect(server);
+			}
+		} else {
+			//TODO: Maybe select the right server on the cloud core?
+			Optional<CloudServerInfo> server = bungee.getServers().values().parallelStream().filter(s -> s.getTemplateName().equalsIgnoreCase(packet.getServerName())).findAny();
+
+			if(player != null && server.isPresent()) {
+				player.connect(server.get());
+			}
 		}
 	}
 

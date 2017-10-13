@@ -3,6 +3,7 @@ package de.syscy.kagecloud.util;
 import java.util.List;
 
 import de.syscy.kagecloud.CloudServer;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,7 +37,7 @@ public class BasicServerController extends ServerController {
 		}
 
 		for(currentServerAmount++; availableServers < minAvailableServers; availableServers++, currentServerAmount++) {
-			if(currentServerAmount >= maxServers) {
+			if(currentServerAmount > maxServers) {
 				break;
 			}
 
