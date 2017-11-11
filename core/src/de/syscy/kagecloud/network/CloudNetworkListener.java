@@ -14,6 +14,9 @@ import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudConnection.Type;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.RelayPacket;
+import de.syscy.kagecloud.network.packet.info.gui.PlayerListPacket;
+import de.syscy.kagecloud.network.packet.info.gui.PlayerListPacket.Player;
+import de.syscy.kagecloud.network.packet.info.gui.RequestPlayerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket.Server;
@@ -27,6 +30,7 @@ import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
+import de.syscy.kagecloud.util.SearchQueryFilter;
 import de.syscy.kagecloud.util.UUID;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -228,12 +232,21 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	public void received(CloudCoreConnection connection, RequestServerListPacket packet) {
 		List<Server> serverList = new ArrayList<>();
 
-		core.getServers().values().stream().forEach(server -> serverList.add(Server.fromCloudServer(server)));
+		core.getServers().values().stream().filter(new SearchQueryFilter(packet.getSearchQuery(), true)).forEach(server -> serverList.add(Server.fromCloudServer(server)));
 
 		ServerListPacket response = new ServerListPacket(serverList);
 		response.setId(packet.getId());
 		connection.sendTCP(response);
-		KageCloud.logger.info("Send " + response);
+	}
+
+	public void received(CloudCoreConnection connection, RequestPlayerListPacket packet) {
+		List<Player> playerList = new ArrayList<>();
+
+		core.getPlayers().values().stream().filter(new SearchQueryFilter(packet.getSearchQuery(), false)).limit(10).forEach(player -> playerList.add(Player.fromCloudPlayer(player)));
+
+		PlayerListPacket response = new PlayerListPacket(playerList);
+		response.setId(packet.getId());
+		connection.sendTCP(response);
 	}
 
 	public void received(CloudCoreConnection connection, ConnectPlayerPacket packet) {

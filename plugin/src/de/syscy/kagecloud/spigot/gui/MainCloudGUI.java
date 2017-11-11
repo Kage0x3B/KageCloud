@@ -1,10 +1,5 @@
 package de.syscy.kagecloud.spigot.gui;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-
-import com.esotericsoftware.kryonet.Connection;
-
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
@@ -14,6 +9,13 @@ import de.syscy.kagegui.icon.ItemIcon;
 import de.syscy.kagegui.inventory.KGUI;
 import de.syscy.kagegui.inventory.component.KButton;
 import de.syscy.kagegui.inventory.listener.ButtonClickListener;
+
+import org.bukkit.Material;
+import org.bukkit.SkullType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import com.esotericsoftware.kryonet.Connection;
 
 public class MainCloudGUI extends KGUI {
 	public MainCloudGUI(KageCloudSpigot plugin) {
@@ -37,5 +39,18 @@ public class MainCloudGUI extends KGUI {
 			}
 		}, "Open running server list");
 		add(serverButton);
+
+		ItemStack skullItemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+
+		KButton findPlayer = new KButton(1, 0);
+		findPlayer.setTitle("Find player");
+		findPlayer.setIcon(new ItemIcon(skullItemStack));
+		findPlayer.setClickListener(new ButtonClickListener() {
+			@Override
+			public void onClick(KButton button, Player player) {
+				KageGUI.showGUI(new PlayerSearchGUI(plugin), player);
+			}
+		}, "Search for a player on the network");
+		add(findPlayer);
 	}
 }

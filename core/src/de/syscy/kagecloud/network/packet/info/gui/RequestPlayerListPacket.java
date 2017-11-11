@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestServerListPacket extends IDPacket {
+public class RequestPlayerListPacket extends IDPacket {
 	private @Getter String searchQuery = "";
 }

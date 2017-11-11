@@ -6,6 +6,8 @@ import java.util.HashMap;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudConnection.Type;
 import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
+import de.syscy.kagecloud.network.packet.info.gui.PlayerListPacket;
+import de.syscy.kagecloud.network.packet.info.gui.RequestPlayerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.ServerListPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
@@ -54,6 +56,8 @@ public class Packet {
 		kryo.register(PlayerAmountPacket.class);
 		kryo.register(RequestServerListPacket.class);
 		kryo.register(ServerListPacket.class);
+		kryo.register(RequestPlayerListPacket.class);
+		kryo.register(PlayerListPacket.class);
 
 		kryo.register(RelayPacket.class);
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());
@@ -67,5 +71,6 @@ public class Packet {
 		kryo.register(ArrayList.class);
 
 		kryo.register(ServerListPacket.Server.class);
+		kryo.register(PlayerListPacket.Player.class);
 	}
 }

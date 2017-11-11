@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.network.packet.info.IDPacket;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -24,6 +25,11 @@ public class ServerListPacket extends IDPacket {
 
 		private Server() {
 
+		}
+
+		@Override
+		public String toString() {
+			return name;
 		}
 
 		public static Server fromCloudServer(CloudServer cloudServer) {
