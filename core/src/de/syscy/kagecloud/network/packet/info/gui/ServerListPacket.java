@@ -3,7 +3,7 @@ package de.syscy.kagecloud.network.packet.info.gui;
 import java.util.List;
 
 import de.syscy.kagecloud.CloudServer;
-import de.syscy.kagecloud.network.packet.info.IDPacket;
+import de.syscy.kagecloud.network.packet.IDPacket;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

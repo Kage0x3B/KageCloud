@@ -15,7 +15,9 @@ import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
+import de.syscy.kagecloud.network.packet.player.ConnectedServerInfoPacket;
 import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
@@ -24,6 +26,8 @@ import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
+import de.syscy.kagecloud.network.packet.server.CreateServerPacket;
+import de.syscy.kagecloud.network.packet.server.ExecuteCommandPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.UUID;
@@ -47,6 +51,8 @@ public class Packet {
 		kryo.register(PlayerLeaveNetworkPacket.class);
 		kryo.register(PlayerLeaveServerPacket.class);
 		kryo.register(ConnectPlayerPacket.class);
+		kryo.register(ConnectPlayerIDPacket.class);
+		kryo.register(ConnectedServerInfoPacket.class);
 		kryo.register(MessagePacket.class);
 		kryo.register(KickPlayerPacket.class);
 

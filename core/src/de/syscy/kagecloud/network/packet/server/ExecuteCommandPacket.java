@@ -1,4 +1,6 @@
-package de.syscy.kagecloud.network.packet;
+package de.syscy.kagecloud.network.packet.server;
+
+import de.syscy.kagecloud.network.packet.Packet;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

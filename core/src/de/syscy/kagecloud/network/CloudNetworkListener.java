@@ -24,6 +24,7 @@ import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
+import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
@@ -190,7 +191,10 @@ public class CloudNetworkListener extends CloudReflectionListener {
 				case SERVER:
 					core.getServers().forEach((uuid, server) -> receiverList.add(server.getConnection()));
 					break;
-				default:
+				case INVALID:
+					receiverList.addAll(core.getBungeeCordProxies().values());
+					receiverList.addAll(core.getWrappers().values());
+					core.getServers().forEach((uuid, server) -> receiverList.add(server.getConnection()));
 					break;
 			}
 		} else {
@@ -206,7 +210,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 					if(byID) {
 						receiverList.add(core.getWrappers().get(id));
 					} else {
-						core.getBungeeCordProxies().values().parallelStream().filter(w -> w.getName().equalsIgnoreCase(name)).forEach(w -> receiverList.add(w));
+						core.getWrappers().values().parallelStream().filter(w -> w.getName().equalsIgnoreCase(name)).forEach(w -> receiverList.add(w));
 					}
 					break;
 				case SERVER:
@@ -217,7 +221,17 @@ public class CloudNetworkListener extends CloudReflectionListener {
 						core.getServers().values().parallelStream().filter(s -> s.getName().equalsIgnoreCase(name)).forEach(s -> receiverList.add(s.getConnection()));
 					}
 					break;
-				default:
+				case INVALID:
+					if(byID) {
+						receiverList.add(core.getBungeeCordProxies().get(id));
+						receiverList.add(core.getWrappers().get(id));
+						CloudServer server = core.getServers().get(id);
+						receiverList.add(server != null ? server.getConnection() : null);
+					} else {
+						core.getBungeeCordProxies().values().parallelStream().filter(p -> p.getName().equalsIgnoreCase(name)).forEach(p -> receiverList.add(p));
+						core.getWrappers().values().parallelStream().filter(w -> w.getName().equalsIgnoreCase(name)).forEach(w -> receiverList.add(w));
+						core.getServers().values().parallelStream().filter(s -> s.getName().equalsIgnoreCase(name)).forEach(s -> receiverList.add(s.getConnection()));
+					}
 					break;
 			}
 		}
@@ -252,6 +266,15 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	public void received(CloudCoreConnection connection, ConnectPlayerPacket packet) {
 		CloudPlayer player = core.getPlayers().get(UUID.fromString(packet.getPlayerId()));
 
+		if(player != null) {
+			player.getBungeeCordProxy().sendTCP(packet);
+		}
+	}
+
+	public void received(CloudCoreConnection connection, ConnectPlayerIDPacket packet) {
+		CloudPlayer player = core.getPlayers().get(UUID.fromString(packet.getPlayerId()));
+
+		KageCloud.logger.info(getClass() + ": ConnectPlayerIDPacket, player=" + player + ", server=" + packet.getServerName());
 		if(player != null) {
 			player.getBungeeCordProxy().sendTCP(packet);
 		}

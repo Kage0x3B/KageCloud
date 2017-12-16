@@ -5,12 +5,12 @@ import java.util.Map;
 
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
-import de.syscy.kagecloud.network.packet.ExecuteCommandPacket;
+import de.syscy.kagecloud.network.packet.IDPacket;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
-import de.syscy.kagecloud.network.packet.info.IDPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.server.ExecuteCommandPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
 import de.syscy.kagecloud.util.UUID;
@@ -49,17 +49,12 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 		if(object instanceof IDPacket) {
 			IDPacket packet = (IDPacket) object;
 
-			KageCloud.logger.info("Received " + packet);
 			IDPacketListener<?> listener = idPacketListeners.remove(packet.getId());
 
 			if(listener != null) {
-				KageCloud.logger.info("listener found for " + packet);
 				listener.received0(connection, packet);
 			}
 		}
-	}
-
-	public void received(Connection connection, IDPacket packet) {
 	}
 
 	public void received(Connection connection, ExecuteCommandPacket packet) {
@@ -83,11 +78,10 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 	}
 
 	public void addIDPacketListener(IDPacket packet, IDPacketListener<?> listener) {
-		idPacketListeners.put(packet.generateID(), listener);
+		idPacketListeners.put(packet.prepareIDPacket(plugin.getNodeId()), listener);
 	}
 
 	public static interface IDPacketListener<T extends IDPacket> {
-		@SuppressWarnings("unchecked")
 		default public void received0(Connection connection, IDPacket packet) {
 			received(connection, (T) packet);
 		};

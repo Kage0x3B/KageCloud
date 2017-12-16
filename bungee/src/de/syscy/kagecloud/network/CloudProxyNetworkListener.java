@@ -6,11 +6,14 @@ import java.util.UUID;
 import de.syscy.kagecloud.CloudServerInfo;
 import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
+import de.syscy.kagecloud.network.packet.Packet;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
+import de.syscy.kagecloud.network.packet.player.ConnectedServerInfoPacket;
 import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
@@ -71,20 +74,34 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, ConnectPlayerPacket packet) {
 		ProxiedPlayer player = BungeeCord.getInstance().getPlayer(UUID.fromString(packet.getPlayerId()));
+		Optional<ServerInfo> serverInfo = getServer(packet.getServerName(), packet.isExactServer());
 
-		if(packet.isExactServer()) {
-			ServerInfo server = BungeeCord.getInstance().getServerInfo(packet.getServerName());
+		if(player != null && serverInfo.isPresent()) {
+			player.connect(serverInfo.get());
+		}
+	}
 
-			if(player != null && server != null) {
-				player.connect(server);
-			}
+	public void received(Connection connection, ConnectPlayerIDPacket packet) {
+		ProxiedPlayer player = BungeeCord.getInstance().getPlayer(UUID.fromString(packet.getPlayerId()));
+		Optional<ServerInfo> serverInfo = getServer(packet.getServerName(), packet.isExactServer());
+
+		if(player != null && serverInfo.isPresent()) {
+			player.connect(serverInfo.get());
+
+			ConnectedServerInfoPacket response = new ConnectedServerInfoPacket(serverInfo.get().getName());
+			response.setId(packet.getId());
+			Packet finalResponse = response.buildResponse(packet);
+
+			bungee.getClient().sendTCP(finalResponse);
+		}
+	}
+
+	private Optional<ServerInfo> getServer(String serverName, boolean exactServer) {
+		if(exactServer) {
+			return Optional.ofNullable(BungeeCord.getInstance().getServerInfo(serverName));
 		} else {
-			//TODO: Maybe select the right server on the cloud core?
-			Optional<CloudServerInfo> server = bungee.getServers().values().parallelStream().filter(s -> s.getTemplateName().equalsIgnoreCase(packet.getServerName())).findAny();
-
-			if(player != null && server.isPresent()) {
-				player.connect(server.get());
-			}
+			Optional<CloudServerInfo> cloudServerInfoOptional = bungee.getServers().values().parallelStream().filter(s -> s.getTemplateName().equalsIgnoreCase(serverName)).findAny();
+			return cloudServerInfoOptional.isPresent() ? Optional.of((ServerInfo) cloudServerInfoOptional.get()) : Optional.empty();
 		}
 	}
 

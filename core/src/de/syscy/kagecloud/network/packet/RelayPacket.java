@@ -7,7 +7,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RelayPacket extends Packet {
@@ -20,6 +22,14 @@ public class RelayPacket extends Packet {
 
 	public static RelayPacket toAllOfType(Type type, Packet packet) {
 		return new RelayPacket(type, null, null, true, packet);
+	}
+
+	public static RelayPacket toNode(UUID id, Packet packet) {
+		return new RelayPacket(Type.INVALID, id, null, false, packet);
+	}
+
+	public static RelayPacket toNode(String name, Packet packet) {
+		return new RelayPacket(Type.INVALID, null, name, false, packet);
 	}
 
 	public static RelayPacket toProxy(UUID id, Packet packet) {

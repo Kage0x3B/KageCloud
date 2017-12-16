@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.ChunkedPacketListener;
+import de.syscy.kagecloud.network.packet.IDPacket;
 import de.syscy.kagecloud.network.packet.Packet;
-import de.syscy.kagecloud.network.packet.info.IDPacket;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
 import de.syscy.kagecloud.spigot.network.CloudPluginNetworkListener.IDPacketListener;
 
