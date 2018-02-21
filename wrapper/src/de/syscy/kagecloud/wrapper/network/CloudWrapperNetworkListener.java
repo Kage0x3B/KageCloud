@@ -1,7 +1,7 @@
 package de.syscy.kagecloud.wrapper.network;
 
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener.ReflectionListener;
+import java.io.IOException;
+import java.util.Optional;
 
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
@@ -11,6 +11,10 @@ import de.syscy.kagecloud.network.packet.server.CreateServerPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.wrapper.CloudServer;
 import de.syscy.kagecloud.wrapper.KageCloudWrapper;
+
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener.ReflectionListener;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -37,11 +41,18 @@ public class CloudWrapperNetworkListener extends ReflectionListener {
 	}
 
 	public void received(Connection connection, ReloadServerPacket packet) {
-		CloudServer server = wrapper.getServers().values().parallelStream().filter(s -> s.getServerName().equalsIgnoreCase(packet.getServerName())).findAny().orElse(null);
+		Optional<CloudServer> serverOpt = wrapper.getServers().values().parallelStream().filter(s -> s.getServerName().equalsIgnoreCase(packet.getServerName())).findAny();
 
-		if(server != null) {
-			server.copyPlugins();
-			server.copyTemplates();
+		if(serverOpt.isPresent()) {
+			CloudServer server = serverOpt.get();
+
+			try {
+				server.copyPlugins();
+				server.copyPluginData();
+				server.copyTemplateData();
+			} catch(IOException ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 }

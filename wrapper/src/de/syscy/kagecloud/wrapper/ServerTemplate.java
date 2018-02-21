@@ -6,6 +6,7 @@ import java.util.List;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.configuration.file.YamlConfiguration;
 import de.syscy.kagecloud.util.UUID;
+
 import lombok.Getter;
 
 public class ServerTemplate {
@@ -16,6 +17,8 @@ public class ServerTemplate {
 	private final @Getter File templateDirectory;
 
 	private final @Getter File serverJAR;
+
+	private final @Getter String worldName;
 
 	private final @Getter List<String> plugins;
 
@@ -35,6 +38,8 @@ public class ServerTemplate {
 
 		serverJAR = new File(wrapper.getDataFolder(), yaml.getString("serverJAR"));
 
+		worldName = yaml.getString("world");
+
 		plugins = yaml.getStringList("plugins");
 		plugins.addAll(wrapper.getGlobalPlugins());
 
@@ -46,15 +51,15 @@ public class ServerTemplate {
 	}
 
 	public static ServerTemplate loadServerTemplate(KageCloudWrapper wrapper, UUID serverId, String serverName, String templateName) {
-		File file = new File(wrapper.getTemplatesDirectory(), templateName + ".yml");
+		File templateFile = new File(wrapper.getTemplatesDirectory(), templateName + ".yml");
 
-		if(!file.exists()) {
+		if(!templateFile.exists()) {
 			KageCloud.logger.warning("Server template " + templateName + " does not exist");
 
 			return null;
 		}
 
-		YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+		YamlConfiguration yaml = YamlConfiguration.loadConfiguration(templateFile);
 
 		return new ServerTemplate(wrapper, serverId, serverName, templateName, yaml);
 	}

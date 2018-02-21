@@ -1,5 +1,6 @@
 package de.syscy.kagecloud.network;
 
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,6 +9,8 @@ import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.Packet;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
+import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
+import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
@@ -107,5 +110,19 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, PluginDataPacket packet) {
 		bungee.onPluginData(connection, packet);
+	}
+
+	public void received(Connection connection, PlayerAmountPacket packet) {
+		for(Entry<de.syscy.kagecloud.util.UUID, Integer> amountEntry : packet.getPlayerAmount().entrySet()) {
+			CloudServerInfo serverInfo = bungee.getServers().get(amountEntry.getKey());
+
+			if(serverInfo != null) {
+				serverInfo.setActualPlayers(amountEntry.getValue());
+			}
+		}
+	}
+
+	public void received(Connection connection, UpdatePingDataPacket packet) {
+		bungee.getPingListener().updateFromPacket(packet);
 	}
 }

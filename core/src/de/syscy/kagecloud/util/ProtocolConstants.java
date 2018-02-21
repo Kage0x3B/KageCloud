@@ -1,39 +1,38 @@
 package de.syscy.kagecloud.util;
 
-public class ProtocolConstants {
-	public static final int MINECRAFT_1_8 = 47;
-	public static final int MINECRAFT_1_9 = 107;
-	public static final int MINECRAFT_1_9_1 = 108;
-	public static final int MINECRAFT_1_9_2 = 109;
-	public static final int MINECRAFT_1_9_4 = 110;
-	public static final int MINECRAFT_1_10 = 210;
-	public static final int MINECRAFT_1_11 = 315;
-	public static final int MINECRAFT_1_11_1 = 316;
-	public static final int MINECRAFT_1_12 = 332;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public enum ProtocolConstants {
+	//@-
+	MINECRAFT_1_8("1.8", 47),
+	MINECRAFT_1_9("1.9", 107),
+	MINECRAFT_1_9_1("1.9.1", 108),
+	MINECRAFT_1_9_2("1.9.2", 109),
+	MINECRAFT_1_9_4("1.9.4", 110),
+	MINECRAFT_1_10("1.10", 210),
+	MINECRAFT_1_11("1.11", 315),
+	MINECRAFT_1_11_1("1.11.1", 316),
+	MINECRAFT_1_12("1.12", 335),
+	MINECRAFT_1_12_1("1.12.1", 338),
+	MINECRAFT_1_12_2("1.12.2", 340);
+	//@+
+
+	private final @Getter String name;
+	private final @Getter int versionNumber;
 
 	public static String getVersionName(int version) {
-		if(version < MINECRAFT_1_8) {
-			return "Lower than 1.8";
-		} else if(version < MINECRAFT_1_9) {
-			return "1.8";
-		} else if(version < MINECRAFT_1_9_1) {
-			return "1.9";
-		} else if(version < MINECRAFT_1_9_2) {
-			return "1.9.1";
-		} else if(version < MINECRAFT_1_9_4) {
-			return "1.9.2";
-		} else if(version < MINECRAFT_1_10) {
-			return "1.9.4";
-		} else if(version < MINECRAFT_1_11) {
-			return "1.10";
-		} else if(version < MINECRAFT_1_11_1) {
-			return "1.11";
-		} else if(version < MINECRAFT_1_12) {
-			return "1.11.x";
-		} else if(version == MINECRAFT_1_12) {
-			return "1.12";
-		} else {
-			return "Higher than 1.12";
+		if(version < values()[0].getVersionNumber()) {
+			return "< " + values()[0].getName();
 		}
+
+		for(ProtocolConstants protocolVersion : values()) {
+			if(protocolVersion.getVersionNumber() <= version) {
+				return protocolVersion.getName();
+			}
+		}
+
+		return "> " + values()[values().length - 1].getName();
 	}
 }

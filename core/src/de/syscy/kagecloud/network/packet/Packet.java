@@ -3,9 +3,11 @@ package de.syscy.kagecloud.network.packet;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudConnection.Type;
 import de.syscy.kagecloud.network.packet.info.PlayerAmountPacket;
+import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.network.packet.info.gui.PlayerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestPlayerListPacket;
 import de.syscy.kagecloud.network.packet.info.gui.RequestServerListPacket;
@@ -33,8 +35,17 @@ import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.UUID;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryonet.Connection;
 
 public class Packet {
+	public void sendTo(Connection connection) {
+		connection.sendTCP(this);
+	}
+
+	public void sendTo(CloudServer server) {
+		server.getConnection().sendTCP(this);
+	}
+
 	public static void registerKryoClasses(Kryo kryo) {
 		kryo.register(CreateServerPacket.class);
 		kryo.register(ExecuteCommandPacket.class);
@@ -60,6 +71,7 @@ public class Packet {
 		kryo.register(RemoveServerPacket.class);
 
 		kryo.register(PlayerAmountPacket.class);
+		kryo.register(UpdatePingDataPacket.class);
 		kryo.register(RequestServerListPacket.class);
 		kryo.register(ServerListPacket.class);
 		kryo.register(RequestPlayerListPacket.class);
@@ -69,6 +81,7 @@ public class Packet {
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());
 		kryo.register(ChunkedPacket.class, new ChunkedPacket.ChunkedPacketSerializer());
 
+		kryo.register(String[].class);
 		kryo.register(UUID.class, new UUID.UUIDSerializer());
 		kryo.register(ServerStatus.class);
 		kryo.register(ChatMessageType.class);

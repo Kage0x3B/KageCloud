@@ -17,6 +17,8 @@ import java.util.logging.Level;
 
 import de.syscy.kagecloud.event.ServerStartedEvent;
 import de.syscy.kagecloud.event.ServerStoppedEvent;
+import de.syscy.kagecloud.listener.CloudListener;
+import de.syscy.kagecloud.listener.PingListener;
 import de.syscy.kagecloud.network.ChunkedPacketListener;
 import de.syscy.kagecloud.network.CloudProxyNetworkListener;
 import de.syscy.kagecloud.network.packet.Packet;
@@ -52,6 +54,8 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
 
+	private @Getter PingListener pingListener;
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onEnable() {
@@ -85,6 +89,8 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 		getProxy().setReconnectHandler(new CloudReconnectHandler(this));
 
 		getProxy().getPluginManager().registerListener(this, new CloudListener(this));
+		pingListener = new PingListener();
+		getProxy().getPluginManager().registerListener(this, pingListener);
 
 		getProxy().getServers().clear();
 	}

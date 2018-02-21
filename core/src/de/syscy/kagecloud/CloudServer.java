@@ -8,6 +8,7 @@ import de.syscy.kagecloud.network.CloudConnection;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.IConnectionRepresentation;
 import de.syscy.kagecloud.util.UUID;
+
 import lombok.Getter;
 
 public class CloudServer implements IConnectionRepresentation, Comparable<CloudServer> {
@@ -39,5 +40,9 @@ public class CloudServer implements IConnectionRepresentation, Comparable<CloudS
 	@Override
 	public int compareTo(CloudServer serverInfo) {
 		return players.size() - serverInfo.getPlayers().size();
+	}
+
+	public static boolean isNotEmptyLobby(CloudServer cloudServer) {
+		return cloudServer.isLobby() && cloudServer.getPlayers().size() > 0;
 	}
 }

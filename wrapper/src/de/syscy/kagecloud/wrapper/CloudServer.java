@@ -7,11 +7,14 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.util.UUID;
+
+import org.apache.commons.io.FileUtils;
+
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 public class CloudServer {
@@ -38,36 +41,39 @@ public class CloudServer {
 		templateName = template.getTemplateName();
 	}
 
-	public void prepareServerFolder() {
+	public void prepareServerFolder() throws IOException {
 		serverFolder = new File(wrapper.getServersDirectory(), serverId.toString());
 		serverFolder.mkdirs();
 
 		pluginsFolder = new File(serverFolder, "plugins");
 		pluginsFolder.mkdirs();
 
-		copyPlugins();
-		copyTemplates();
+		copySharedData();
+		copyTemplateData();
 
-		try {
-			FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
-		} catch(IOException ex) {
-			ex.printStackTrace();
-		}
+		FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
 	}
 
-	public void copyPlugins() {
+	public void copySharedData() throws IOException {
+		copyGeneralData();
+		copyPlugins();
+		copyPluginData();
+		copyWorld();
+	}
+
+	public void copyGeneralData() throws IOException {
+		FileUtils.copyDirectory(wrapper.getGeneralDataDirectory(), serverFolder);
+	}
+
+	public void copyPlugins() throws IOException {
 		List<String> pluginNames = template.getPlugins();
 
-		for(File pluginFile : wrapper.getGlobalPluginDirectory().listFiles(new JARFileFilter())) {
+		for(File pluginFile : wrapper.getGlobalPluginDirectory().listFiles(JARFileFilter.getInstance())) {
 			String pluginFileName = pluginFile.getName().substring(0, pluginFile.getName().length() - 4); //Removes the .jar (the 4 last characters)
 
 			for(String pluginName : pluginNames) {
 				if(pluginFileName.equalsIgnoreCase(pluginName)) {
-					try {
-						FileUtils.copyFileToDirectory(pluginFile, pluginsFolder);
-					} catch(IOException ex) {
-						ex.printStackTrace();
-					}
+					FileUtils.copyFileToDirectory(pluginFile, pluginsFolder);
 
 					break;
 				}
@@ -75,12 +81,28 @@ public class CloudServer {
 		}
 	}
 
-	public void copyTemplates() {
-		try {
-			FileUtils.copyDirectory(template.getTemplateDirectory(), serverFolder);
-		} catch(IOException ex) {
-			ex.printStackTrace();
+	public void copyPluginData() throws IOException {
+		FileUtils.copyDirectory(wrapper.getPluginDataDirectory(), pluginsFolder);
+	}
+
+	public void copyWorld() throws IOException {
+		if(template.getWorldName() == null || template.getWorldName().isEmpty()) {
+			return;
 		}
+
+		File worldDirectory = new File(wrapper.getWorldsDirectory(), template.getWorldName());
+		File destDirectory = new File(serverFolder, "world");
+		destDirectory.mkdirs();
+
+		if(worldDirectory.exists() && worldDirectory.isDirectory()) {
+			FileUtils.copyDirectory(worldDirectory, destDirectory);
+		} else {
+			KageCloud.logger.warning("World directory does not exist: " + template.getWorldName() + " (Should be at " + worldDirectory.getAbsolutePath() + ")");
+		}
+	}
+
+	public void copyTemplateData() throws IOException {
+		FileUtils.copyDirectory(template.getTemplateDirectory(), serverFolder);
 	}
 
 	public void start() {
@@ -198,7 +220,10 @@ public class CloudServer {
 		return commands;
 	}
 
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
 	private static class JARFileFilter implements FileFilter {
+		private static final @Getter(lazy = true) JARFileFilter instance = new JARFileFilter();
+
 		@Override
 		public boolean accept(File pathname) {
 			return pathname.getAbsolutePath().toLowerCase().endsWith(".jar");

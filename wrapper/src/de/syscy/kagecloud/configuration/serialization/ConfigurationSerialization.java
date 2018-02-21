@@ -17,7 +17,7 @@ import de.syscy.kagecloud.util.Validate;
 public class ConfigurationSerialization {
 	public static final String SERIALIZED_TYPE_KEY = "==";
 	private final Class<? extends ConfigurationSerializable> clazz;
-	private static Map<String, Class<? extends ConfigurationSerializable>> aliases = new HashMap<String, Class<? extends ConfigurationSerializable>>();
+	private static Map<String, Class<? extends ConfigurationSerializable>> aliases = new HashMap<>();
 
 	static {
 		//		registerClass(???.class);

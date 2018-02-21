@@ -1,9 +1,12 @@
-package de.syscy.kagecloud;
+package de.syscy.kagecloud.listener;
 
+import de.syscy.kagecloud.CloudServerInfo;
+import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
+
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -37,7 +40,7 @@ public class CloudListener implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerJoinServer(ServerDisconnectEvent event) {
+	public void onPlayerLeaveServer(ServerDisconnectEvent event) {
 		CloudServerInfo serverInfo = (CloudServerInfo) event.getTarget();
 
 		bungee.getClient().sendTCP(new PlayerLeaveServerPacket(event.getPlayer().getUniqueId().toString(), serverInfo.getId().toString()));

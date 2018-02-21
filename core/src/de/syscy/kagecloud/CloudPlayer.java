@@ -98,7 +98,7 @@ public class CloudPlayer implements CommandSender {
 	 */
 	public void sendMessage(ChatMessageType position, BaseComponent... message) {
 		// Action bar on 1.8 doesn't display the new JSON formattings, legacy works - send it using this for now
-		if(position == ChatMessageType.ACTION_BAR && version <= ProtocolConstants.MINECRAFT_1_8) {
+		if(position == ChatMessageType.ACTION_BAR && version <= ProtocolConstants.MINECRAFT_1_8.getVersionNumber()) {
 			sendMessage(position, ComponentSerializer.toString(new TextComponent(BaseComponent.toLegacyText(message))));
 		} else {
 			sendMessage(position, ComponentSerializer.toString(message));
@@ -113,7 +113,7 @@ public class CloudPlayer implements CommandSender {
 	 */
 	public void sendMessage(ChatMessageType position, BaseComponent message) {
 		// Action bar on 1.8 doesn't display the new JSON formattings, legacy works - send it using this for now
-		if(position == ChatMessageType.ACTION_BAR && version <= ProtocolConstants.MINECRAFT_1_8) {
+		if(position == ChatMessageType.ACTION_BAR && version <= ProtocolConstants.MINECRAFT_1_8.getVersionNumber()) {
 			sendMessage(position, ComponentSerializer.toString(new TextComponent(BaseComponent.toLegacyText(message))));
 		} else {
 			sendMessage(position, ComponentSerializer.toString(message));

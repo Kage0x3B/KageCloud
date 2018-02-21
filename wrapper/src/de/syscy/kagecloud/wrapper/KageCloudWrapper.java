@@ -8,13 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.commons.io.FileUtils;
 
 import de.syscy.kagecloud.ICloudNode;
 import de.syscy.kagecloud.KageCloud;
@@ -25,6 +24,9 @@ import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.util.Charsets;
 import de.syscy.kagecloud.util.UUID;
 import de.syscy.kagecloud.wrapper.network.CloudWrapperClient;
+
+import org.apache.commons.io.FileUtils;
+
 import lombok.Getter;
 
 public class KageCloudWrapper implements ICloudNode {
@@ -38,7 +40,11 @@ public class KageCloudWrapper implements ICloudNode {
 	private final @Getter String credentials;
 
 	private @Getter File templatesDirectory;
+	private @Getter File sharedDataDirectory;
+	private @Getter File generalDataDirectory;
 	private @Getter File globalPluginDirectory;
+	private @Getter File pluginDataDirectory;
+	private @Getter File worldsDirectory;
 	private @Getter File serversDirectory;
 
 	private @Getter CloudWrapperClient client;
@@ -57,10 +63,16 @@ public class KageCloudWrapper implements ICloudNode {
 		saveDefaultConfig();
 
 		templatesDirectory = new File(dataFolder, "templates");
-		templatesDirectory.mkdirs();
-		globalPluginDirectory = new File(dataFolder, "plugins");
-		globalPluginDirectory.mkdirs();
+		sharedDataDirectory = new File(dataFolder, "sharedData");
+		generalDataDirectory = new File(sharedDataDirectory, "general");
+		globalPluginDirectory = new File(sharedDataDirectory, "plugins");
+		pluginDataDirectory = new File(sharedDataDirectory, "pluginData");
+		worldsDirectory = new File(sharedDataDirectory, "worlds");
 		serversDirectory = new File(dataFolder, "servers");
+
+		for(File dataDirectory : Arrays.asList(templatesDirectory, sharedDataDirectory, generalDataDirectory, globalPluginDirectory, pluginDataDirectory, worldsDirectory, serversDirectory)) {
+			dataDirectory.mkdirs();
+		}
 
 		if(serversDirectory.exists()) {
 			try {
@@ -114,7 +126,14 @@ public class KageCloudWrapper implements ICloudNode {
 				}
 
 				CloudServer server = new CloudServer(wrapper, template);
-				server.prepareServerFolder();
+				try {
+					server.prepareServerFolder();
+				} catch(IOException ex) {
+					KageCloud.logger.log(Level.SEVERE, "Could not prepare server folder", ex);
+
+					return;
+				}
+
 				server.start();
 
 				servers.put(server.getServerId(), server);

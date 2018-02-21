@@ -18,10 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.base.Preconditions;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import de.syscy.kagecloud.chat.BaseComponent;
 import de.syscy.kagecloud.chat.ComponentSerializer;
 import de.syscy.kagecloud.chat.TextComponent;
@@ -37,6 +33,7 @@ import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudCoreConnection;
 import de.syscy.kagecloud.network.KryoServer;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
+import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
@@ -50,10 +47,17 @@ import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
 import de.syscy.kagecloud.util.BasicServerController;
 import de.syscy.kagecloud.util.Charsets;
+import de.syscy.kagecloud.util.ChunkedPacketSender;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
-import de.syscy.kagecloud.util.PlayerAmountUpdater;
+import de.syscy.kagecloud.util.ProxyDataUpdater;
 import de.syscy.kagecloud.util.ServerController;
+import de.syscy.kagecloud.util.ServerPingData;
 import de.syscy.kagecloud.util.UUID;
+
+import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import lombok.Getter;
 
 public class KageCloudCore implements ICloudNode {
@@ -80,15 +84,17 @@ public class KageCloudCore implements ICloudNode {
 	private @Getter Map<UUID, CloudConnection> wrappers = new HashMap<>();
 	private @Getter Map<UUID, CloudServer> servers = new HashMap<>();
 
+	private @Getter Map<String, ServerController> serverControllers = new HashMap<>();
+
 	private int serverNameCounter = 1;
 
 	private @Getter List<String> startingServerTemplates = new ArrayList<>();
 
-	private @Getter Map<String, ServerController> serverControllers = new HashMap<>();
-
 	private @Getter Map<UUID, CloudPlayer> players = new HashMap<>();
 
 	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
+
+	private @Getter ServerPingData serverPingData;
 
 	public KageCloudCore() {
 		// Java uses ! to indicate a resource inside of a jar/zip/other container. Running KageCloud from within a directory that has a ! will cause this to muck up.
@@ -96,6 +102,7 @@ public class KageCloudCore implements ICloudNode {
 
 		KageCloud.cloudNode = this;
 		KageCloud.logger = logger;
+		KageCloud.scheduler = scheduler;
 
 		KageCloud.dataFolder = dataFolder = new File(System.getProperty("user.dir"));
 		getDataFolder().mkdirs();
@@ -108,6 +115,8 @@ public class KageCloudCore implements ICloudNode {
 		configFile = new File(dataFolder, "config.yml");
 		saveDefaultConfig();
 
+		serverPingData = new ServerPingData(this);
+
 		credentials = getConfig().getString("credentials");
 
 		loadPlugins();
@@ -115,7 +124,7 @@ public class KageCloudCore implements ICloudNode {
 
 		//		addServerController(new BasicServerController("lobby", 1, 10, 75));
 
-		scheduler.schedule(pluginManager.getCorePlugin(), new PlayerAmountUpdater(this), 10, 10, TimeUnit.SECONDS);
+		scheduler.schedule(pluginManager.getCorePlugin(), new ProxyDataUpdater(this), 10, 10, TimeUnit.SECONDS);
 
 		server = new KryoServer();
 
@@ -275,6 +284,9 @@ public class KageCloudCore implements ICloudNode {
 			connection.sendTCP(new AddServerPacket(cloudServer.getConnection().getNodeId(), cloudServer.getName(), cloudServer.getAddress().getPort(), cloudServer.getTemplateName(), cloudServer.isLobby()));
 		}
 
+		UpdatePingDataPacket pingDataPacket = new UpdatePingDataPacket(serverPingData);
+		ChunkedPacketSender.sendPacket(pingDataPacket, 16384, connection);
+
 		bungeeCordProxies.put(proxyId, connection);
 	}
 
@@ -400,7 +412,7 @@ public class KageCloudCore implements ICloudNode {
 
 	public void saveDefaultConfig() {
 		if(!configFile.exists()) {
-			saveResource("/coreconfig.yml", false);
+			saveResource("/config.yml", false);
 		}
 	}
 
