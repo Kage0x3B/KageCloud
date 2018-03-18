@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.syscy.kagecloud.CloudServerInfo;
 import de.syscy.kagecloud.KageCloudBungee;
+
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
@@ -17,6 +18,12 @@ public class CloudReconnectHandler extends AbstractReconnectHandler {
 
 	@Override
 	protected CloudServerInfo getStoredServer(ProxiedPlayer player) {
+		if(plugin.isMaintenanceMode()) {
+			player.disconnect(new TextComponent(ChatColor.GOLD + "The network is currently in " + ChatColor.RED + "maintenance mode" + ChatColor.GOLD + ", please come back later..."));
+
+			return null;
+		}
+
 		List<CloudServerInfo> availableLobbyServers = plugin.getJoinableLobbyServers(player);
 
 		if(!availableLobbyServers.isEmpty()) {

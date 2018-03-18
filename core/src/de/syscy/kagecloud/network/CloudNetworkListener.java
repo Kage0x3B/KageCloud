@@ -56,7 +56,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 				core.removeProxy(connection.getNodeId());
 				break;
 			case SERVER:
-				core.removeServer(connection.getNodeId());
+				core.removeServer(connection.getNodeId(), true);
 				break;
 			case WRAPPER:
 				core.removeWrapper(connection.getNodeId());
@@ -129,7 +129,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 			}
 		} else if(connection.getType() == Type.SERVER) {
 			if(packet.getStatus() == ServerStatus.OFFLINE) {
-				core.removeServer(connection.getNodeId());
+				core.removeServer(connection.getNodeId(), true);
 			}
 		}
 	}

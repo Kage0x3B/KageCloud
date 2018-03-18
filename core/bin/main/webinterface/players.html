@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <meta name="description" content="">
+	    <meta name="author" content="Kage0x3B">
+
+	    <title>KageCloud</title>
+
+	    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	    <link href="vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+	    <link href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" rel="stylesheet">
+	    <link href="css/sb-admin-2.css" rel="stylesheet">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+	    <!--[if lt IE 9]>
+	        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+	</head>
+	<body>
+	    <div id="wrapper">
+	        <!-- Navigation -->
+	        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+	            <div class="navbar-header">
+	                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	                    <span class="sr-only">Toggle navigation</span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                </button>
+	                <a class="navbar-brand" href="index.html">KageCloud</a>
+	            </div>
+	            <!-- /.navbar-header -->
+
+	            <div class="navbar-default sidebar" role="navigation">
+	                <div class="sidebar-nav navbar-collapse">
+	                    <ul class="nav" id="side-menu">
+	                        <li>
+	                            <a href="index.html"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+	                        </li>
+		                    <li>
+		                        <a href="players.html"><i class="fa fa-users fa-fw"></i> Players</a>
+		                    </li>
+	                    </ul>
+	                </div>
+	                <!-- /.sidebar-collapse -->
+	            </div>
+	            <!-- /.navbar-static-side -->
+	        </nav>
+
+	        <div id="page-wrapper">
+	            <div class="row">
+	                <div class="col-lg-12">
+	                    <h1 class="page-header">Players</h1>
+	                </div>
+	                <!-- /.col-lg-12 -->
+	            </div>
+				<table id="playerTable" class="display" cellspacing="0" width="100%">
+			        <thead>
+			            <tr>
+			                <th>Name</th>
+			                <th>Server</th>
+			                <th>UUID</th>
+			            </tr>
+			        </thead>
+			        <tfoot>
+			            <tr>
+			                <th>Name</th>
+			                <th>Server</th>
+			                <th>UUID</th>
+			            </tr>
+			        </tfoot>
+				</table>
+	        </div>
+	        <!-- /#page-wrapper -->
+			<!-- Player Modal -->
+			<div class="modal fade" id="playerModal" tabindex="-1" role="dialog" aria-labelledby="playerModalTitle">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			        <h4 class="modal-title" id="playerModalTitle">...</h4>
+			      </div>
+			      <div id="playerModalContent" class="modal-body">
+
+			      </div>
+			      <div class="modal-footer">
+					 <div class="col-md-6">
+						<input type="text" class="form-control" id="messageInput" placeholder="Message">
+					</div>
+  					<div class="col-md-2">
+						<button id="messageSendButton" type="submit" class="btn btn-default">Send</button>
+					</div>
+					<div class="col-md-4">
+				        <button id="kickButton" type="button" class="btn btn-primary">Kick</button>
+					</div>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+	    </div>
+	    <!-- /#wrapper -->
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	    <script src="vendor/metisMenu/metisMenu.min.js"></script>
+	    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+	    <script src="js/sb-admin-2.js"></script>
+
+	    <script src="js/players.js"></script>
+	</body>
+</html>

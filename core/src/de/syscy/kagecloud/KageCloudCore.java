@@ -53,8 +53,11 @@ import de.syscy.kagecloud.util.ProxyDataUpdater;
 import de.syscy.kagecloud.util.ServerController;
 import de.syscy.kagecloud.util.ServerPingData;
 import de.syscy.kagecloud.util.UUID;
+import de.syscy.kagecloud.webserver.WebServer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -89,12 +92,15 @@ public class KageCloudCore implements ICloudNode {
 	private int serverNameCounter = 1;
 
 	private @Getter List<String> startingServerTemplates = new ArrayList<>();
+	private Multimap<CloudConnection, UUID> serverWrappers = HashMultimap.create();
 
 	private @Getter Map<UUID, CloudPlayer> players = new HashMap<>();
 
 	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
 
 	private @Getter ServerPingData serverPingData;
+
+	private @Getter WebServer webInterface;
 
 	public KageCloudCore() {
 		// Java uses ! to indicate a resource inside of a jar/zip/other container. Running KageCloud from within a directory that has a ! will cause this to muck up.
@@ -137,6 +143,8 @@ public class KageCloudCore implements ICloudNode {
 
 			System.exit(1);
 		}
+
+		webInterface = new WebServer(this);
 	}
 
 	public void loadPlugins() {
@@ -227,14 +235,15 @@ public class KageCloudCore implements ICloudNode {
 	}
 
 	public boolean createServer(String templateName) {
-		UUID serverId = UUID.randomUUID();
-		String serverName = getServerName(templateName);
-
 		CloudConnection wrapperConnection = getAvailableWrapper();
 
 		if(wrapperConnection != null) {
+			UUID serverId = UUID.randomUUID();
+			String serverName = getServerName(templateName);
+
 			startingServerTemplates.add(templateName);
 			wrapperConnection.sendTCP(new CreateServerPacket(serverId, templateName, serverName));
+			serverWrappers.put(wrapperConnection, serverId);
 
 			return true;
 		} else {
@@ -261,7 +270,7 @@ public class KageCloudCore implements ICloudNode {
 		KageCloud.logger.info("Server registered: " + packet.getName() + " (" + connection.getRemoteAddressTCP() + ":" + packet.getPort() + ")");
 	}
 
-	public void removeServer(UUID serverId) {
+	public void removeServer(UUID serverId, boolean sendShutdown) {
 		CloudServer serverInfo = servers.remove(serverId);
 
 		if(serverInfo != null) {
@@ -313,6 +322,8 @@ public class KageCloudCore implements ICloudNode {
 
 		if(wrapperConnection != null) {
 			wrapperConnection.shutdown();
+
+			serverWrappers.removeAll(wrapperConnection).forEach(sId -> removeServer(sId, false));
 		}
 	}
 

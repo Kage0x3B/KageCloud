@@ -2,10 +2,12 @@ package de.syscy.kagecloud.listener;
 
 import java.util.UUID;
 
+import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.util.ProtocolConstants;
 
 import lombok.Setter;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.Favicon;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.ServerPing.PlayerInfo;
@@ -18,6 +20,10 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 public class PingListener implements Listener {
+	private final KageCloudBungee plugin;
+
+	private final ServerPing maintenceModePing;
+
 	private @Setter String supportedProtocolString = "Unsupported Minecraft Version";
 	private @Setter int minProtocolVersion = 335;
 	private @Setter int maxProtocolVersion = 340;
@@ -30,8 +36,18 @@ public class PingListener implements Listener {
 	private Favicon favicon = null;
 	private Players playerInfoData;
 
-	public PingListener() {
+	public PingListener(KageCloudBungee plugin) {
+		this.plugin = plugin;
+
 		updateServerPing();
+
+		PlayerInfo[] playerInfoHoverData = new PlayerInfo[2];
+		playerInfoHoverData[0] = new PlayerInfo(ChatColor.GOLD + "The network is currently in " + ChatColor.RED + "maintenance mode" + ChatColor.GOLD + ",", UUID.randomUUID());
+		playerInfoHoverData[1] = new PlayerInfo(ChatColor.GOLD + "please come back later...", UUID.randomUUID());
+
+		Players maintenancePlayerData = new Players(0, 0, playerInfoHoverData);
+
+		maintenceModePing = new ServerPing(new Protocol("Maintenance Mode", 0), maintenancePlayerData, ChatColor.RED + "Maintenance Mode", (Favicon) null);
 	}
 
 	public void updateFromPacket(UpdatePingDataPacket packet) {
@@ -87,6 +103,12 @@ public class PingListener implements Listener {
 
 	@EventHandler
 	public void onPing(ProxyPingEvent event) {
+		if(plugin.isMaintenanceMode()) {
+			event.setResponse(maintenceModePing);
+
+			return;
+		}
+
 		int protocolVersion = event.getConnection().getVersion();
 
 		Protocol protocolData;

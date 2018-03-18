@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import de.syscy.kagecloud.event.ServerStartedEvent;
@@ -25,6 +26,7 @@ import de.syscy.kagecloud.network.packet.Packet;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.util.Charsets;
+import de.syscy.kagecloud.util.CloudCoreConnectRunnable;
 import de.syscy.kagecloud.util.CloudReconnectHandler;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
@@ -36,6 +38,7 @@ import com.esotericsoftware.kryonet.Listener;
 import lombok.Getter;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -57,7 +60,6 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 	private @Getter PingListener pingListener;
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onEnable() {
 		KageCloud.cloudNode = this;
 		KageCloud.logger = getLogger();
@@ -73,31 +75,40 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 		Listener listener = new CloudProxyNetworkListener(this);
 		client.addListener(new ChunkedPacketListener(listener));
 		client.addListener(listener);
-
 		client.start();
-
-		try {
-			client.connect(5000, getConfig().getString("coreIP", "localhost"), getConfig().getInt("port"));
-
-			KageCloud.logger.info("Connected to " + getConfig().getString("coreIP", "localhost"));
-		} catch(IOException ex) {
-			ex.printStackTrace();
-
-			getProxy().stop("Could not connect to KageCloud core server!");
-		}
 
 		getProxy().setReconnectHandler(new CloudReconnectHandler(this));
 
 		getProxy().getPluginManager().registerListener(this, new CloudListener(this));
-		pingListener = new PingListener();
+		pingListener = new PingListener(this);
 		getProxy().getPluginManager().registerListener(this, pingListener);
 
-		getProxy().getServers().clear();
+		connectToCore();
 	}
 
 	@Override
 	public void onDisable() {
 		client.close();
+	}
+
+	public void connectToCore() {
+		if(client.isConnected()) {
+			KageCloud.logger.info("Called connectToCore even though the client is already connected?..");
+
+			return;
+		}
+
+		CloudCoreConnectRunnable connectRunnable = new CloudCoreConnectRunnable(this);
+		final ScheduledTask task = getProxy().getScheduler().schedule(this, connectRunnable, 0, 10, TimeUnit.SECONDS);
+		connectRunnable.setTask(task);
+	}
+
+	public boolean isConnected() {
+		return client != null && client.isConnected();
+	}
+
+	public boolean isMaintenanceMode() {
+		return getConfig().getBoolean("maintenanceMode", false) || !isConnected();
 	}
 
 	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {

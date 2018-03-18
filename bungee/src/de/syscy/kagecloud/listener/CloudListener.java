@@ -22,6 +22,10 @@ public class CloudListener implements Listener {
 
 	@EventHandler
 	public void onPlayerJoin(PostLoginEvent event) {
+		if(!bungee.isConnected()) {
+			return;
+		}
+
 		ProxiedPlayer p = event.getPlayer();
 
 		bungee.getClient().sendTCP(new PlayerJoinNetworkPacket(p.getUniqueId().toString(), p.getName(), p.getPendingConnection().getVersion()));
@@ -29,11 +33,19 @@ public class CloudListener implements Listener {
 
 	@EventHandler
 	public void onPlayerLeave(PlayerDisconnectEvent event) {
+		if(!bungee.isConnected()) {
+			return;
+		}
+
 		bungee.getClient().sendTCP(new PlayerLeaveNetworkPacket(event.getPlayer().getUniqueId().toString()));
 	}
 
 	@EventHandler
 	public void onPlayerJoinServer(ServerConnectedEvent event) {
+		if(!bungee.isConnected()) {
+			return;
+		}
+
 		CloudServerInfo serverInfo = (CloudServerInfo) event.getServer().getInfo();
 
 		bungee.getClient().sendTCP(new PlayerJoinServerPacket(event.getPlayer().getUniqueId().toString(), serverInfo.getId().toString()));
@@ -41,6 +53,10 @@ public class CloudListener implements Listener {
 
 	@EventHandler
 	public void onPlayerLeaveServer(ServerDisconnectEvent event) {
+		if(!bungee.isConnected()) {
+			return;
+		}
+
 		CloudServerInfo serverInfo = (CloudServerInfo) event.getTarget();
 
 		bungee.getClient().sendTCP(new PlayerLeaveServerPacket(event.getPlayer().getUniqueId().toString(), serverInfo.getId().toString()));

@@ -1,0 +1,11 @@
+wrapperName: Wrapper
+#The core server IP
+coreIP: localhost
+#The port of the core server (in the config of the core server)
+port: 3479
+#A string which needs to be the same in all configurations which is used by
+#the wrapper and Bukkit plugin to authenticate to the core server
+credentials: cnSrzaKAvR
+globalPlugins:
+  - Essentials
+  - KageCore

@@ -44,11 +44,12 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 
 	@Override
 	public void disconnected(Connection connection) {
-		BungeeCord.getInstance().stop("Shutting down network.");
+		bungee.connectToCore(); //Reconnect
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {
-		BungeeCord.getInstance().stop(packet.getReason() != null ? packet.getReason() : "Shutting down network.");
+		bungee.connectToCore(); //Reconnecting right now because the BungeeCord proxy should never be shutdown
+		//		BungeeCord.getInstance().stop(packet.getReason() != null ? packet.getReason() : "Shutting down network.");
 	}
 
 	public void received(Connection connection, AddServerPacket packet) {
