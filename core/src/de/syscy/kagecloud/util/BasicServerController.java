@@ -31,7 +31,7 @@ public class BasicServerController extends ServerController {
 		int currentServerAmount = currentServers.size();
 
 		for(CloudServer serverInfo : currentServers) {
-			if(isAvailable(serverInfo)) {
+			if(isAvailable(serverInfo) && !isAlmostFull(serverInfo)) {
 				availableServers++;
 			}
 		}
@@ -43,6 +43,10 @@ public class BasicServerController extends ServerController {
 
 			createNewServer();
 		}
+	}
+
+	protected boolean isAlmostFull(CloudServer serverInfo) {
+		return serverInfo.getPlayers().size() > serverPlayerMaximum * 0.75;
 	}
 
 	protected boolean isAvailable(CloudServer serverInfo) {
