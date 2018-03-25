@@ -47,12 +47,14 @@ import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
 import de.syscy.kagecloud.util.BasicServerController;
 import de.syscy.kagecloud.util.Charsets;
+import de.syscy.kagecloud.util.ChatColor;
 import de.syscy.kagecloud.util.ChunkedPacketSender;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.ProxyDataUpdater;
 import de.syscy.kagecloud.util.ServerController;
 import de.syscy.kagecloud.util.ServerPingData;
 import de.syscy.kagecloud.util.UUID;
+import de.syscy.kagecloud.util.Whitelist;
 import de.syscy.kagecloud.webserver.WebServer;
 
 import com.google.common.base.Preconditions;
@@ -101,6 +103,7 @@ public class KageCloudCore implements ICloudNode {
 	private @Getter ServerPingData serverPingData;
 
 	private @Getter WebServer webInterface;
+	private @Getter Whitelist whitelist = new Whitelist();
 
 	public KageCloudCore() {
 		// Java uses ! to indicate a resource inside of a jar/zip/other container. Running KageCloud from within a directory that has a ! will cause this to muck up.
@@ -145,6 +148,10 @@ public class KageCloudCore implements ICloudNode {
 		}
 
 		webInterface = new WebServer(this);
+
+		if(getConfig().getBoolean("whitelist", false)) {
+			whitelist.load(getDataFolder());
+		}
 	}
 
 	public void loadPlugins() {
@@ -208,10 +215,17 @@ public class KageCloudCore implements ICloudNode {
 	}
 
 	public void onPlayerJoin(CloudCoreConnection proxyConnection, PlayerJoinNetworkPacket packet) {
-		CloudPlayer player = new CloudPlayer(UUID.fromString(packet.getId()), packet.getName(), packet.getVersion(), proxyConnection);
-		players.put(player.getId(), player);
+		UUID playerId = UUID.fromString(packet.getId());
+		CloudPlayer player = new CloudPlayer(playerId, packet.getName(), packet.getVersion(), proxyConnection);
 
-		pluginManager.callEvent(new PlayerConnectEvent(player));
+		if(whitelist.isAllowed(playerId)) {
+			players.put(player.getId(), player);
+
+			pluginManager.callEvent(new PlayerConnectEvent(player));
+		} else {
+			player.kick(ChatColor.RED + "You are not whitelisted!");
+			KageCloud.logger.info("Whitelist prevented " + playerId + " from joining");
+		}
 	}
 
 	public void onPlayerLeave(PlayerLeaveNetworkPacket packet) {

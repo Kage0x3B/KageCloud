@@ -12,3 +12,4 @@ pingData:
         - Tes234t &6motd
         - Line444 &42
     favicon: default
+whitelist: false
