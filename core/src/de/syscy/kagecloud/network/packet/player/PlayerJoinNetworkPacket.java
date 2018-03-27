@@ -12,4 +12,6 @@ public class PlayerJoinNetworkPacket extends Packet {
 	private @Getter String id;
 	private @Getter String name;
 	private @Getter int version;
+
+	private @Getter String loginId;
 }

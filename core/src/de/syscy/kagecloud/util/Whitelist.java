@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.syscy.kagecloud.KageCloud;
+import de.syscy.kagecloud.event.EventHandler;
+import de.syscy.kagecloud.event.PlayerLoginEvent;
+import de.syscy.kagecloud.plugin.Listener;
 
-public class Whitelist {
+public class Whitelist implements Listener {
 	private List<UUID> allowedUUIDs = null;
 
 	public void load(File dataFolder) {
@@ -43,5 +46,13 @@ public class Whitelist {
 
 	private String fixUUID(String uuidString) {
 		return uuidString.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
+	}
+
+	@EventHandler
+	public void onPlayerLogin(PlayerLoginEvent event) {
+		if(!allowedUUIDs.contains(event.getPlayer().getId())) {
+			event.setCancelled(true);
+			event.setDisallowMessage("You are not whitelisted!"); //TODO: Replace by translated message..? Or just some kind of translation key send to the proxy?
+		}
 	}
 }

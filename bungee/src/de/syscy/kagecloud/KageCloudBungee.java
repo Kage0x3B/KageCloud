@@ -57,6 +57,7 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 	private Map<String, ICloudPluginDataListener> pluginDataListeners = new HashMap<>();
 
+	private @Getter CloudListener mainListener;
 	private @Getter PingListener pingListener;
 
 	@Override
@@ -79,9 +80,8 @@ public class KageCloudBungee extends Plugin implements ICloudNode {
 
 		getProxy().setReconnectHandler(new CloudReconnectHandler(this));
 
-		getProxy().getPluginManager().registerListener(this, new CloudListener(this));
-		pingListener = new PingListener(this);
-		getProxy().getPluginManager().registerListener(this, pingListener);
+		getProxy().getPluginManager().registerListener(this, mainListener = new CloudListener(this));
+		getProxy().getPluginManager().registerListener(this, pingListener = new PingListener(this));
 
 		connectToCore();
 	}

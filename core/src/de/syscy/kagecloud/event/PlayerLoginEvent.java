@@ -1,7 +1,9 @@
 package de.syscy.kagecloud.event;
 
 import de.syscy.kagecloud.CloudPlayer;
+import de.syscy.kagecloud.plugin.Cancellable;
 import de.syscy.kagecloud.plugin.Event;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -12,9 +14,13 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class PlayerConnectEvent extends Event {
+public class PlayerLoginEvent extends Event implements Cancellable {
+	private boolean cancelled = false;
+
 	/**
 	 * Player connecting.
 	 */
 	private final CloudPlayer player;
+
+	private String disallowMessage;
 }

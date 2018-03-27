@@ -26,8 +26,9 @@ import de.syscy.kagecloud.chat.TranslatableComponent;
 import de.syscy.kagecloud.chat.TranslatableComponentSerializer;
 import de.syscy.kagecloud.configuration.file.FileConfiguration;
 import de.syscy.kagecloud.configuration.file.YamlConfiguration;
-import de.syscy.kagecloud.event.PlayerConnectEvent;
+import de.syscy.kagecloud.event.PlayerConnectedEvent;
 import de.syscy.kagecloud.event.PlayerDisconnectEvent;
+import de.syscy.kagecloud.event.PlayerLoginEvent;
 import de.syscy.kagecloud.network.CloudConnection;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudCoreConnection;
@@ -35,6 +36,8 @@ import de.syscy.kagecloud.network.KryoServer;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
+import de.syscy.kagecloud.network.packet.player.LoginResultPacket;
+import de.syscy.kagecloud.network.packet.player.LoginResultPacket.Result;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
@@ -47,7 +50,6 @@ import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
 import de.syscy.kagecloud.util.BasicServerController;
 import de.syscy.kagecloud.util.Charsets;
-import de.syscy.kagecloud.util.ChatColor;
 import de.syscy.kagecloud.util.ChunkedPacketSender;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.ProxyDataUpdater;
@@ -131,8 +133,6 @@ public class KageCloudCore implements ICloudNode {
 		loadPlugins();
 		enablePlugins();
 
-		//		addServerController(new BasicServerController("lobby", 1, 10, 75));
-
 		scheduler.schedule(pluginManager.getCorePlugin(), new ProxyDataUpdater(this), 10, 10, TimeUnit.SECONDS);
 
 		server = new KryoServer();
@@ -152,6 +152,8 @@ public class KageCloudCore implements ICloudNode {
 		if(getConfig().getBoolean("whitelist", false)) {
 			whitelist.load(getDataFolder());
 		}
+
+		pluginManager.registerEvents(whitelist, pluginManager.getCorePlugin());
 	}
 
 	public void loadPlugins() {
@@ -218,13 +220,17 @@ public class KageCloudCore implements ICloudNode {
 		UUID playerId = UUID.fromString(packet.getId());
 		CloudPlayer player = new CloudPlayer(playerId, packet.getName(), packet.getVersion(), proxyConnection);
 
-		if(whitelist.isAllowed(playerId)) {
+		PlayerLoginEvent loginEvent = new PlayerLoginEvent(player);
+		pluginManager.callEvent(loginEvent);
+
+		if(!loginEvent.isCancelled()) {
 			players.put(player.getId(), player);
 
-			pluginManager.callEvent(new PlayerConnectEvent(player));
+			proxyConnection.sendTCP(new LoginResultPacket(packet.getLoginId()));
+
+			pluginManager.callEvent(new PlayerConnectedEvent(player));
 		} else {
-			player.kick(ChatColor.RED + "You are not whitelisted!");
-			KageCloud.logger.info("Whitelist prevented " + playerId + " from joining");
+			proxyConnection.sendTCP(new LoginResultPacket(packet.getLoginId(), Result.DISALLOWED, loginEvent.getDisallowMessage()));
 		}
 	}
 

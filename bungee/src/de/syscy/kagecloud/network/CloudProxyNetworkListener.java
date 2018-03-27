@@ -18,6 +18,7 @@ import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectedServerInfoPacket;
 import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
+import de.syscy.kagecloud.network.packet.player.LoginResultPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
@@ -48,7 +49,7 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {
-		bungee.connectToCore(); //Reconnecting right now because the BungeeCord proxy should never be shutdown
+		bungee.connectToCore(); //Reconnecting right now because the BungeeCord proxy should never be shutdown TODO
 		//		BungeeCord.getInstance().stop(packet.getReason() != null ? packet.getReason() : "Shutting down network.");
 	}
 
@@ -58,6 +59,10 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 
 	public void received(Connection connection, RemoveServerPacket packet) {
 		bungee.removeServer(packet.getId());
+	}
+
+	public void received(Connection connection, LoginResultPacket packet) {
+		bungee.getMainListener().completeLogin(packet);
 	}
 
 	public void received(Connection connection, KickPlayerPacket packet) {
