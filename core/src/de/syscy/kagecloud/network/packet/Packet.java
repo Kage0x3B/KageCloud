@@ -23,8 +23,9 @@ import de.syscy.kagecloud.network.packet.player.ConnectedServerInfoPacket;
 import de.syscy.kagecloud.network.packet.player.KickPlayerPacket;
 import de.syscy.kagecloud.network.packet.player.LoginResultPacket;
 import de.syscy.kagecloud.network.packet.player.MessagePacket;
+import de.syscy.kagecloud.network.packet.player.PlayerEarlyJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
+import de.syscy.kagecloud.network.packet.player.PlayerLateJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
@@ -60,7 +61,8 @@ public class Packet {
 
 		kryo.register(PlayerJoinNetworkPacket.class);
 		kryo.register(LoginResultPacket.class);
-		kryo.register(PlayerJoinServerPacket.class);
+		kryo.register(PlayerEarlyJoinServerPacket.class);
+		kryo.register(PlayerLateJoinServerPacket.class);
 		kryo.register(PlayerLeaveNetworkPacket.class);
 		kryo.register(PlayerLeaveServerPacket.class);
 		kryo.register(ConnectPlayerPacket.class);

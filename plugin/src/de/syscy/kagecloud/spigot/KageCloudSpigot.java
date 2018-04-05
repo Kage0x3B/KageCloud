@@ -4,24 +4,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import com.esotericsoftware.kryonet.Connection;
-
 import de.syscy.kagecloud.ICloudNode;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.spigot.command.CloudCommandManager;
+import de.syscy.kagecloud.spigot.listener.CloudListener;
 import de.syscy.kagecloud.spigot.network.CloudPluginClient;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.esotericsoftware.kryonet.Connection;
+
 import lombok.Getter;
 
-public class KageCloudSpigot extends JavaPlugin implements ICloudNode, Listener {
+public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 	private @Getter String nodeName;
 	private @Getter UUID nodeId;
 
@@ -69,7 +70,7 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode, Listener 
 			System.exit(1);
 		}
 
-		Bukkit.getPluginManager().registerEvents(this, this);
+		Bukkit.getPluginManager().registerEvents(new CloudListener(this), this);
 
 		CloudCommandManager cloudCommandManager = new CloudCommandManager(this);
 		getCommand("cloud").setExecutor(cloudCommandManager);

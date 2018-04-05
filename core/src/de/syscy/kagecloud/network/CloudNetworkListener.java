@@ -9,6 +9,7 @@ import de.syscy.kagecloud.CloudPlayer;
 import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.KageCloudCore;
+import de.syscy.kagecloud.event.ServerConnectedEvent;
 import de.syscy.kagecloud.event.ServerStatusChangeEvent;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
 import de.syscy.kagecloud.network.CloudConnection.Type;
@@ -26,8 +27,9 @@ import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
 import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
+import de.syscy.kagecloud.network.packet.player.PlayerEarlyJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
+import de.syscy.kagecloud.network.packet.player.PlayerLateJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
@@ -138,7 +140,18 @@ public class CloudNetworkListener extends CloudReflectionListener {
 		core.onPlayerJoin(connection, packet);
 	}
 
-	public void received(CloudCoreConnection connection, PlayerJoinServerPacket packet) {
+	public void received(CloudCoreConnection connection, PlayerEarlyJoinServerPacket packet) {
+		UUID playerId = UUID.fromString(packet.getPlayerId());
+		UUID serverId = UUID.fromString(packet.getServerId());
+		CloudPlayer player = core.getPlayers().get(playerId);
+		CloudServer server = core.getServers().get(serverId);
+
+		if(player != null && server != null) {
+			player.setCurrentServer(server);
+		}
+	}
+
+	public void received(CloudCoreConnection connection, PlayerLateJoinServerPacket packet) {
 		UUID playerId = UUID.fromString(packet.getPlayerId());
 		UUID serverId = UUID.fromString(packet.getServerId());
 		CloudPlayer player = core.getPlayers().get(playerId);
@@ -147,6 +160,8 @@ public class CloudNetworkListener extends CloudReflectionListener {
 		if(player != null && server != null) {
 			player.setCurrentServer(server);
 			server.getPlayers().put(playerId, player);
+
+			core.getPluginManager().callEvent(new ServerConnectedEvent(player, server));
 		}
 	}
 
@@ -157,12 +172,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	public void received(CloudCoreConnection connection, PlayerLeaveServerPacket packet) {
 		UUID playerId = UUID.fromString(packet.getPlayerId());
 		UUID serverId = UUID.fromString(packet.getServerId());
-		CloudPlayer player = core.getPlayers().get(playerId);
 		CloudServer server = core.getServers().get(serverId);
-
-		if(player != null) {
-			player.setCurrentServer(null);
-		}
 
 		if(server != null) {
 			server.getPlayers().remove(playerId);

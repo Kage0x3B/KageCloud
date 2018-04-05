@@ -8,8 +8,8 @@ import de.syscy.kagecloud.CloudServerInfo;
 import de.syscy.kagecloud.KageCloudBungee;
 import de.syscy.kagecloud.network.packet.player.LoginResultPacket;
 import de.syscy.kagecloud.network.packet.player.LoginResultPacket.Result;
+import de.syscy.kagecloud.network.packet.player.PlayerEarlyJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerJoinServerPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import de.syscy.kagecloud.util.UUID;
@@ -17,8 +17,8 @@ import de.syscy.kagecloud.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.event.ServerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -30,7 +30,7 @@ public class CloudListener implements Listener {
 	private final Map<UUID, Consumer<LoginResultPacket>> loginResultConsumers = new HashMap<>();
 
 	@EventHandler
-	public void onPlayerJoin(PreLoginEvent event) {
+	public void onPlayerJoin(LoginEvent event) {
 		PendingConnection connection = event.getConnection();
 		UUID loginId = UUID.randomUUID();
 
@@ -39,15 +39,17 @@ public class CloudListener implements Listener {
 		loginResultConsumers.put(loginId, new Consumer<LoginResultPacket>() {
 			@Override
 			public void accept(LoginResultPacket packet) {
-				event.setCancelReason(TextComponent.fromLegacyText(packet.getMessage()));
 				event.setCancelled(packet.getResult() == Result.DISALLOWED);
+
+				if(packet.getResult() == Result.DISALLOWED) {
+					event.setCancelReason(TextComponent.fromLegacyText(packet.getMessage()));
+				}
 
 				event.completeIntent(bungee);
 			}
 		});
 
 		bungee.getClient().sendTCP(new PlayerJoinNetworkPacket(connection.getUniqueId().toString(), connection.getName(), connection.getVersion(), loginId.toString()));
-
 	}
 
 	public void completeLogin(LoginResultPacket packet) {
@@ -75,7 +77,7 @@ public class CloudListener implements Listener {
 
 		CloudServerInfo serverInfo = (CloudServerInfo) event.getServer().getInfo();
 
-		bungee.getClient().sendTCP(new PlayerJoinServerPacket(event.getPlayer().getUniqueId().toString(), serverInfo.getId().toString()));
+		bungee.getClient().sendTCP(new PlayerEarlyJoinServerPacket(event.getPlayer().getUniqueId().toString(), serverInfo.getId().toString()));
 	}
 
 	@EventHandler

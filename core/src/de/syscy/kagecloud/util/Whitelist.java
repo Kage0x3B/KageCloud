@@ -50,7 +50,7 @@ public class Whitelist implements Listener {
 
 	@EventHandler
 	public void onPlayerLogin(PlayerLoginEvent event) {
-		if(!allowedUUIDs.contains(event.getPlayer().getId())) {
+		if(allowedUUIDs != null && !allowedUUIDs.contains(event.getPlayer().getId())) {
 			event.setCancelled(true);
 			event.setDisallowMessage("You are not whitelisted!"); //TODO: Replace by translated message..? Or just some kind of translation key send to the proxy?
 		}

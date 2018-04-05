@@ -2,20 +2,17 @@ package de.syscy.kagecloud.event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import lombok.AllArgsConstructor;
+
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
-public class EventHandlerMethod
-{
+@RequiredArgsConstructor
+public class EventHandlerMethod {
+	private final @Getter Object listener;
 
-    @Getter
-    private final Object listener;
-    @Getter
-    private final Method method;
+	private final @Getter Method method;
 
-    public void invoke(Object event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-    {
-        method.invoke( listener, event );
-    }
+	public void invoke(Object event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		method.invoke(listener, event);
+	}
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerJoinServerPacket extends Packet {
+public class PlayerEarlyJoinServerPacket extends Packet {
 	private @Getter String playerId;
 	private @Getter String serverId;
 }

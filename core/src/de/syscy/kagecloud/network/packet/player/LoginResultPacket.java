@@ -16,7 +16,7 @@ public class LoginResultPacket extends Packet {
 
 	/**
 	 *
-	 * @param loginId The loginId received in the {@link PlayerJoinServerPacket}
+	 * @param loginId The loginId received in the {@link PlayerLateJoinServerPacket}
 	 */
 	public LoginResultPacket(@NonNull String loginId) {
 		this(loginId, Result.ALLOWED, null);

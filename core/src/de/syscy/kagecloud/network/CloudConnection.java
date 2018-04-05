@@ -1,9 +1,10 @@
 package de.syscy.kagecloud.network;
 
-import com.esotericsoftware.kryonet.Connection;
-
 import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
 import de.syscy.kagecloud.util.UUID;
+
+import com.esotericsoftware.kryonet.Connection;
+
 import lombok.Getter;
 import lombok.Setter;
 
