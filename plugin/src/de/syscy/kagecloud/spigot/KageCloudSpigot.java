@@ -1,9 +1,6 @@
 package de.syscy.kagecloud.spigot;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.esotericsoftware.kryonet.Connection;
 import de.syscy.kagecloud.ICloudNode;
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.network.CloudConnection.ServerStatus;
@@ -14,13 +11,13 @@ import de.syscy.kagecloud.spigot.listener.CloudListener;
 import de.syscy.kagecloud.spigot.network.CloudPluginClient;
 import de.syscy.kagecloud.util.ICloudPluginDataListener;
 import de.syscy.kagecloud.util.UUID;
-
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.esotericsoftware.kryonet.Connection;
-
-import lombok.Getter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 	private @Getter String nodeName;
@@ -84,6 +81,7 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 	}
 
 	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {
+		KageCloud.logger.info("Registered plugin message listener " + listener.getClass().getSimpleName() + " for channel \"" + channel + "\"");
 		pluginDataListeners.put(channel.toLowerCase(), listener);
 	}
 
