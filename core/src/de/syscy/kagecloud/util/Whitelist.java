@@ -33,8 +33,6 @@ public class Whitelist implements Listener {
 					KageCloud.logger.info("Invalid UUID: " + line);
 				}
 			});
-		} catch(FileNotFoundException ex) {
-			ex.printStackTrace();
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}
@@ -50,9 +48,9 @@ public class Whitelist implements Listener {
 
 	@EventHandler
 	public void onPlayerLogin(PlayerLoginEvent event) {
-		if(allowedUUIDs != null && !allowedUUIDs.contains(event.getPlayer().getId())) {
+		if(isAllowed(event.getPlayer().getId())) {
 			event.setCancelled(true);
-			event.setDisallowMessage("You are not whitelisted!"); //TODO: Replace by translated message..? Or just some kind of translation key send to the proxy?
+			event.setDisallowMessage("You are not whitelisted!"); //TODO: Replace by translated message..? Or just some kind of translation key sent to the proxy?
 		}
 	}
 }
