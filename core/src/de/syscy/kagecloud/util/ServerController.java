@@ -17,6 +17,8 @@ public abstract class ServerController implements Runnable {
 	private @Setter KageCloudCore plugin;
 	private @Getter @Setter ScheduledTask task;
 
+	private final @Getter(lazy = true) StartingServerInfo startingServerInfoInstance = new StartingServerInfo();
+
 	public ServerController(String templateName) {
 		this.templateName = templateName.toLowerCase();
 	}
@@ -36,7 +38,7 @@ public abstract class ServerController implements Runnable {
 
 		for(String startingServerInfo : new ArrayList<>(plugin.getStartingServerTemplates())) {
 			if(templateName.equals(startingServerInfo)) {
-				serverInfoList.add(new StartingServerInfo());
+				serverInfoList.add(getStartingServerInfoInstance());
 			}
 		}
 

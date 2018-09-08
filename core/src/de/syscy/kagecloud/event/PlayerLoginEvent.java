@@ -14,13 +14,9 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class PlayerLoginEvent extends Event implements Cancellable {
-	private boolean cancelled = false;
-
+public class PlayerLoginEvent extends Event {
 	/**
 	 * Player connecting.
 	 */
 	private final CloudPlayer player;
-
-	private String disallowMessage;
 }

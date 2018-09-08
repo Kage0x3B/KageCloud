@@ -61,10 +61,6 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 		bungee.removeServer(packet.getId());
 	}
 
-	public void received(Connection connection, LoginResultPacket packet) {
-		bungee.getMainListener().completeLogin(packet);
-	}
-
 	public void received(Connection connection, KickPlayerPacket packet) {
 		ProxiedPlayer player = BungeeCord.getInstance().getPlayer(UUID.fromString(packet.getPlayerId()));
 

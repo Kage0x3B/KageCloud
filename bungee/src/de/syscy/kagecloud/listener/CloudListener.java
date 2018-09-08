@@ -27,37 +27,16 @@ import net.md_5.bungee.event.EventHandler;
 @RequiredArgsConstructor
 public class CloudListener implements Listener {
 	private final KageCloudBungee bungee;
-	private final Map<UUID, Consumer<LoginResultPacket>> loginResultConsumers = new HashMap<>();
 
 	@EventHandler
 	public void onPlayerJoin(LoginEvent event) {
-		PendingConnection connection = event.getConnection();
-		UUID loginId = UUID.randomUUID();
-
-		event.registerIntent(bungee);
-
-		loginResultConsumers.put(loginId, new Consumer<LoginResultPacket>() {
-			@Override
-			public void accept(LoginResultPacket packet) {
-				event.setCancelled(packet.getResult() == Result.DISALLOWED);
-
-				if(packet.getResult() == Result.DISALLOWED) {
-					event.setCancelReason(TextComponent.fromLegacyText(packet.getMessage()));
-				}
-
-				event.completeIntent(bungee);
-			}
-		});
-
-		bungee.getClient().sendTCP(new PlayerJoinNetworkPacket(connection.getUniqueId().toString(), connection.getName(), connection.getVersion(), loginId.toString()));
-	}
-
-	public void completeLogin(LoginResultPacket packet) {
-		UUID loginId = UUID.fromString(packet.getLoginId());
-
-		if(loginResultConsumers.containsKey(loginId)) {
-			loginResultConsumers.remove(loginId).accept(packet);
+		if(!bungee.isConnected()) {
+			return;
 		}
+
+		PendingConnection connection = event.getConnection();
+
+		bungee.getClient().sendTCP(new PlayerJoinNetworkPacket(connection.getUniqueId().toString(), connection.getName(), connection.getVersion()));
 	}
 
 	@EventHandler

@@ -223,15 +223,8 @@ public class KageCloudCore implements ICloudNode {
 		PlayerLoginEvent loginEvent = new PlayerLoginEvent(player);
 		pluginManager.callEvent(loginEvent);
 
-		if(!loginEvent.isCancelled()) {
-			players.put(player.getId(), player);
-
-			proxyConnection.sendTCP(new LoginResultPacket(packet.getLoginId()));
-
-			pluginManager.callEvent(new PlayerConnectedEvent(player));
-		} else {
-			proxyConnection.sendTCP(new LoginResultPacket(packet.getLoginId(), Result.DISALLOWED, loginEvent.getDisallowMessage()));
-		}
+		players.put(player.getId(), player);
+		pluginManager.callEvent(new PlayerConnectedEvent(player));
 	}
 
 	public void onPlayerLeave(PlayerLeaveNetworkPacket packet) {
