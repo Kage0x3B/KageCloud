@@ -112,3 +112,7 @@ project(":plugin") {
 tasks.eclipse.doLast {
     delete ".project"
 }
+
+javadoc {
+	failOnError = false
+}
