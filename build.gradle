@@ -23,6 +23,7 @@ allprojects {
     repositories {
 		jcenter()
 		maven { url "http://oss.sonatype.org/content/groups/public/" }
+		maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
 		maven { url "https://jitpack.io" }
     }
 }
@@ -96,6 +97,7 @@ project(":plugin") {
 		compile 'org.projectlombok:lombok:1.16.2'
 
 		compile files('libs/spigot-1.12.jar')
+		compileOnly "org.spigotmc:spigot-api:1.12-R0.1-SNAPSHOT"
 		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
 		compile "com.github.Kage0x3B:KageCore:$kageCoreVersion"
     }
