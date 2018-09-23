@@ -58,7 +58,7 @@ public class CloudPluginNetworkListener extends ReflectionListener {
 	}
 
 	public void received(Connection connection, ExecuteCommandPacket packet) {
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), packet.getCommand());
+		Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), packet.getCommand()));
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {
