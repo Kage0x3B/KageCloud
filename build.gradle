@@ -48,6 +48,10 @@ project(":core") {
 		compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
 		compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
     }
+
+	javadoc {
+		failOnError = false
+	}
 }
 
 project(":bungee") {
@@ -64,6 +68,10 @@ project(":bungee") {
 
 		compile files('libs/waterfall.jar')
     }
+
+	javadoc {
+		failOnError = false
+	}
 }
 
 project(":wrapper") {
@@ -85,6 +93,10 @@ project(":wrapper") {
 		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
 		compile group: 'commons-io', name: 'commons-io', version: '2.5'
     }
+
+	javadoc {
+		failOnError = false
+	}
 }
 
 project(":plugin") {
@@ -107,12 +119,12 @@ project(":plugin") {
     		exclude(dependency('com.github.Kage0x3B:KageCore'))
     	}
     }
+
+	javadoc {
+		failOnError = false
+	}
 }
 
 tasks.eclipse.doLast {
     delete ".project"
-}
-
-javadoc {
-	failOnError = false
 }
