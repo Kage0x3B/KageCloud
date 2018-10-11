@@ -9,11 +9,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -174,7 +170,7 @@ public class KageCloudCore implements ICloudNode {
 	}
 
 	public void enablePlugins() {
-		Arrays.stream(pluginManager.getPlugins()).forEach(p -> enablePlugin(p));
+		Arrays.stream(pluginManager.getPlugins()).forEach(this::enablePlugin);
 	}
 
 	public void disablePlugins() {
@@ -195,7 +191,7 @@ public class KageCloudCore implements ICloudNode {
 
 	public void shutdown(String reason) {
 		KageCloud.logger.info("Disabling plugins");
-		pluginManager.disablePlugins();
+		disablePlugins();
 
 		KageCloud.logger.info("Shutting down BungeeCord proxies...");
 
@@ -248,6 +244,10 @@ public class KageCloudCore implements ICloudNode {
 	}
 
 	public boolean createServer(String templateName) {
+		return this.createServer(templateName, Collections.emptyMap());
+	}
+
+	public boolean createServer(String templateName, Map<String, String> extraData) {
 		CloudConnection wrapperConnection = getAvailableWrapper();
 
 		if(wrapperConnection != null) {
@@ -255,7 +255,7 @@ public class KageCloudCore implements ICloudNode {
 			String serverName = getServerName(templateName);
 
 			startingServerTemplates.add(templateName);
-			wrapperConnection.sendTCP(new CreateServerPacket(serverId, templateName, serverName));
+			wrapperConnection.sendTCP(new CreateServerPacket(serverId, templateName, serverName, extraData));
 			serverWrappers.put(wrapperConnection, serverId);
 
 			return true;

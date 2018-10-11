@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import de.syscy.kagecloud.KageCloud;
 import de.syscy.kagecloud.util.UUID;
@@ -22,6 +23,7 @@ public class CloudServer {
 
 	private final KageCloudWrapper wrapper;
 	private final @Getter ServerTemplate template;
+	private final @Getter Map<String, String> extraData;
 
 	private final @Getter UUID serverId;
 	private final @Getter String serverName;
@@ -32,9 +34,10 @@ public class CloudServer {
 	private @Getter File serverFolder;
 	private File pluginsFolder;
 
-	public CloudServer(KageCloudWrapper wrapper, ServerTemplate template) {
+	public CloudServer(KageCloudWrapper wrapper, ServerTemplate template, Map<String, String> extraData) {
 		this.wrapper = wrapper;
 		this.template = template;
+		this.extraData = extraData;
 
 		serverId = template.getServerId();
 		serverName = template.getServerName();
@@ -86,7 +89,13 @@ public class CloudServer {
 	}
 
 	public void copyWorld() throws IOException {
-		if(template.getWorldName() == null || template.getWorldName().isEmpty()) {
+		String worldName = template.getWorldName();
+
+		if(extraData.containsKey("worldOverride")) {
+			worldName = extraData.get("worldOverride");
+		}
+
+		if(worldName == null || worldName.isEmpty()) {
 			return;
 		}
 
@@ -106,41 +115,42 @@ public class CloudServer {
 	}
 
 	public void start() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				List<String> commands = buildCommands(template);
+		new Thread(() -> {
+			List<String> commands = buildCommands(template);
 
-				ProcessBuilder processBuilder = new ProcessBuilder(commands);
+			ProcessBuilder processBuilder = new ProcessBuilder(commands);
 
-				processBuilder.environment().put("serverId", serverId.toString());
-				processBuilder.environment().put("serverName", serverName);
-				processBuilder.environment().put("templateName", templateName);
-				processBuilder.environment().put("wrapperName", wrapper.getNodeName());
-				processBuilder.environment().put("isLobbyServer", Boolean.toString(template.isLobby()));
+			processBuilder.environment().put("KC_serverId", serverId.toString());
+			processBuilder.environment().put("KC_serverName", serverName);
+			processBuilder.environment().put("KC_templateName", templateName);
+			processBuilder.environment().put("KC_wrapperName", wrapper.getNodeName());
+			processBuilder.environment().put("KC_isLobbyServer", Boolean.toString(template.isLobby()));
 
-				processBuilder.directory(serverFolder);
+			for(Map.Entry<String, String> extraDataEntry : extraData.entrySet()) {
+				processBuilder.environment().put("KC_" + extraDataEntry.getKey(), extraDataEntry.getValue());
+			}
 
-				//DEBUG Code
-				processBuilder.redirectErrorStream(true);
-				processBuilder.redirectOutput(Redirect.INHERIT);
-				processBuilder.redirectError(Redirect.INHERIT);
+			processBuilder.directory(serverFolder);
 
-				try {
-					process = processBuilder.start();
-					KageCloud.logger.info("Started server!");
-					process.waitFor();
+			//DEBUG Code
+			processBuilder.redirectErrorStream(true);
+			processBuilder.redirectOutput(Redirect.INHERIT);
+			processBuilder.redirectError(Redirect.INHERIT);
 
-					KageCloud.logger.info("Server " + serverName + " went offline");
-				} catch(IOException ex) {
-					System.out.println("Error while starting the server (template: " + templateName + ")");
+			try {
+				process = processBuilder.start();
+				KageCloud.logger.info("Started server!");
+				process.waitFor();
 
-					ex.printStackTrace();
-				} catch(InterruptedException ex) {
-					ex.printStackTrace();
-				} finally {
-					cleanUp();
-				}
+				KageCloud.logger.info("Server " + serverName + " went offline");
+			} catch(IOException ex) {
+				System.out.println("Error while starting the server (template: " + templateName + ")");
+
+				ex.printStackTrace();
+			} catch(InterruptedException ex) {
+				ex.printStackTrace();
+			} finally {
+				cleanUp();
 			}
 		}).start();
 	}

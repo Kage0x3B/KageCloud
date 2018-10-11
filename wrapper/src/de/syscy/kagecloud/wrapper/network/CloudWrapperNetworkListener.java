@@ -33,7 +33,7 @@ public class CloudWrapperNetworkListener extends ReflectionListener {
 	}
 
 	public void received(Connection connection, CreateServerPacket packet) {
-		wrapper.createServer(packet.getServerId(), packet.getServerName(), packet.getTemplateName());
+		wrapper.createServer(packet.getServerId(), packet.getServerName(), packet.getTemplateName(), packet.getExtraData());
 	}
 
 	public void received(Connection connection, ShutdownPacket packet) {

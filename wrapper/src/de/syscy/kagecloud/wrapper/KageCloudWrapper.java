@@ -109,35 +109,32 @@ public class KageCloudWrapper implements ICloudNode {
 		}
 	}
 
-	public void createServer(final UUID serverId, final String serverName, final String templateName) {
+	public void createServer(final UUID serverId, final String serverName, final String templateName, final Map<String, String> extraData) {
 		final KageCloudWrapper wrapper = this;
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				KageCloud.logger.info("Creating server with template " + templateName);
+		new Thread(() -> {
+			KageCloud.logger.info("Creating server with template " + templateName);
 
-				ServerTemplate template = ServerTemplate.loadServerTemplate(wrapper, serverId, serverName, templateName);
+			ServerTemplate template = ServerTemplate.loadServerTemplate(wrapper, serverId, serverName, templateName);
 
-				if(template == null) {
-					KageCloud.logger.severe("Could not load template " + templateName);
+			if(template == null) {
+				KageCloud.logger.severe("Could not load template " + templateName);
 
-					return;
-				}
-
-				CloudServer server = new CloudServer(wrapper, template);
-				try {
-					server.prepareServerFolder();
-				} catch(IOException ex) {
-					KageCloud.logger.log(Level.SEVERE, "Could not prepare server folder", ex);
-
-					return;
-				}
-
-				server.start();
-
-				servers.put(server.getServerId(), server);
+				return;
 			}
+
+			CloudServer server = new CloudServer(wrapper, template, extraData);
+			try {
+				server.prepareServerFolder();
+			} catch(IOException ex) {
+				KageCloud.logger.log(Level.SEVERE, "Could not prepare server folder", ex);
+
+				return;
+			}
+
+			server.start();
+
+			servers.put(server.getServerId(), server);
 		}).start();
 	}
 

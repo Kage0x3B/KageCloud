@@ -39,7 +39,7 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 		KageCloud.logger = getLogger();
 		KageCloud.dataFolder = getDataFolder();
 
-		String serverIdString = System.getenv("serverId");
+		String serverIdString = getExtraData("serverId");
 
 		if(serverIdString == null) {
 			KageCloud.logger.severe("Please start the server using KageCloud.");
@@ -50,10 +50,10 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 		}
 
 		nodeId = UUID.fromString(serverIdString);
-		nodeName = System.getenv("serverName");
-		templateName = System.getenv("templateName");
-		wrapperName = System.getenv("wrapperName");
-		lobbyServer = Boolean.parseBoolean(System.getenv("isLobbyServer"));
+		nodeName = getExtraData("serverName");
+		templateName = getExtraData("templateName");
+		wrapperName = getExtraData("wrapperName");
+		lobbyServer = Boolean.parseBoolean(getExtraData("isLobbyServer"));
 
 		credentials = getConfig().getString("credentials");
 
@@ -78,6 +78,10 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 	public void onDisable() {
 		client.sendTCP(new ChangeStatusPacket(ServerStatus.OFFLINE));
 		client.close();
+	}
+
+	public String getExtraData(String key) {
+		return System.getenv("KC_" + key);
 	}
 
 	public void registerPluginDataListener(String channel, ICloudPluginDataListener listener) {
