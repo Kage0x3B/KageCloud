@@ -1,5 +1,10 @@
 package de.syscy.kagecloud.spigot.gui;
 
+import de.syscy.kagecloud.network.packet.RelayPacket;
+import de.syscy.kagecloud.network.packet.node.ShutdownPacket;
+import de.syscy.kagecloud.network.packet.server.KickAllPlayersPacket;
+import de.syscy.kagegui.KageGUI;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,6 +21,7 @@ import de.syscy.kagegui.inventory.listener.ButtonClickListener;
 import de.syscy.kagegui.util.ClickType;
 import de.syscy.kagegui.util.LoreBuilder;
 import lombok.AllArgsConstructor;
+import org.bukkit.inventory.ItemStack;
 
 public class ManageServerGUI extends KGUI {
 	private KageCloudSpigot plugin;
@@ -48,14 +54,10 @@ public class ManageServerGUI extends KGUI {
 		KButton teleportButton = new KButton(1, 0);
 		teleportButton.setTitle("Teleport");
 		teleportButton.setIcon(new ItemIcon(Material.ENDER_PEARL));
-		teleportButton.setClickListener(new ButtonClickListener() {
-			@Override
-			public void onClick(KButton button, Player player) {
-				ConnectPlayerPacket packet = new ConnectPlayerPacket(player.getUniqueId().toString(), server.getName());
-				plugin.getClient().sendTCP(packet);
+		teleportButton.setClickListener((b, p) -> {
+			plugin.getClient().sendTCP(new ConnectPlayerPacket(p.getUniqueId().toString(), server.getName()));
 
-				button.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.EYE_OF_ENDER));
-			}
+			b.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.EYE_OF_ENDER));
 		}, "Teleport you to this server");
 		add(teleportButton);
 
@@ -65,6 +67,26 @@ public class ManageServerGUI extends KGUI {
 		reloadServerButton.setClickListener(new ReloadButtonClickListener(false), "Reload the server");
 		reloadServerButton.setClickListener(ClickType.SHIFT_CLICK, new ReloadButtonClickListener(true), "Kick players and reload the server");
 		add(reloadServerButton);
+
+		KButton kickPlayersButton = new KButton(3, 0);
+		kickPlayersButton.setTitle("Kick All Players");
+		kickPlayersButton.setIcon(new ItemIcon(Material.BARRIER));
+		kickPlayersButton.setClickListener((b, p) -> {
+			plugin.getClient().sendTCP(new KickAllPlayersPacket(server.getName()));
+
+			b.displayStatus(5, ChatColor.GOLD + "Kicked all players", new ItemIcon(new ItemStack(Material.WOOL, 1, (short) 0, (byte) 5)));
+		}, "Kick all players and send them to a lobby");
+		add(kickPlayersButton);
+
+		KButton shutdownButton = new KButton(4, 0);
+		shutdownButton.setTitle("Shutdown server");
+		shutdownButton.setIcon(new ItemIcon(Material.LAVA_BUCKET));
+		shutdownButton.setClickListener((b, p) -> {
+			plugin.getClient().sendTCP(RelayPacket.toServer(server.getName(), new ShutdownPacket()));
+
+			b.displayStatus(5, ChatColor.GOLD + "Shutdown the server", new ItemIcon(Material.RED_GLAZED_TERRACOTTA));
+		}, "Shutdown the server");
+		add(shutdownButton);
 	}
 
 	@AllArgsConstructor

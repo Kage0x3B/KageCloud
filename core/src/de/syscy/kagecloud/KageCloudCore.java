@@ -44,15 +44,8 @@ import de.syscy.kagecloud.plugin.SimplePluginManager;
 import de.syscy.kagecloud.plugin.java.JavaPluginLoader;
 import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
-import de.syscy.kagecloud.util.BasicServerController;
-import de.syscy.kagecloud.util.Charsets;
-import de.syscy.kagecloud.util.ChunkedPacketSender;
-import de.syscy.kagecloud.util.ICloudPluginDataListener;
-import de.syscy.kagecloud.util.ProxyDataUpdater;
-import de.syscy.kagecloud.util.ServerController;
-import de.syscy.kagecloud.util.ServerPingData;
+import de.syscy.kagecloud.util.*;
 import de.syscy.kagecloud.util.UUID;
-import de.syscy.kagecloud.util.Whitelist;
 import de.syscy.kagecloud.webserver.WebServer;
 
 import com.google.common.base.Preconditions;
@@ -91,7 +84,7 @@ public class KageCloudCore implements ICloudNode {
 
 	private int serverNameCounter = 1;
 
-	private @Getter List<String> startingServerTemplates = new ArrayList<>();
+	private @Getter Map<UUID, StartingServerData> startingServers = new HashMap<>();
 	private Multimap<CloudConnection, UUID> serverWrappers = HashMultimap.create();
 
 	private @Getter Map<UUID, CloudPlayer> players = new HashMap<>();
@@ -243,27 +236,30 @@ public class KageCloudCore implements ICloudNode {
 		}
 	}
 
-	public boolean createServer(String templateName) {
-		return this.createServer(templateName, Collections.emptyMap());
+	public Optional<UUID> createServer(String templateName) {
+		return this.createServer(templateName, new HashMap<>());
 	}
 
-	public boolean createServer(String templateName, Map<String, String> extraData) {
+	public Optional<UUID> createServer(String templateName, Map<String, String> extraData) {
+		return createServer(getServerName(templateName), templateName, extraData);
+	}
+
+	public Optional<UUID> createServer(String serverName, String templateName, Map<String, String> extraData) {
 		CloudConnection wrapperConnection = getAvailableWrapper();
 
 		if(wrapperConnection != null) {
 			UUID serverId = UUID.randomUUID();
-			String serverName = getServerName(templateName);
 
-			startingServerTemplates.add(templateName);
+			startingServers.put(serverId, new StartingServerData(serverId, templateName, extraData));
 			wrapperConnection.sendTCP(new CreateServerPacket(serverId, templateName, serverName, extraData));
 			serverWrappers.put(wrapperConnection, serverId);
 
-			return true;
+			return Optional.of(serverId);
 		} else {
 			KageCloud.logger.warning("No wrapper available for starting a " + templateName + " server");
 		}
 
-		return false;
+		return Optional.empty();
 	}
 
 	public void addServer(CloudCoreConnection connection, RegisterServerPacket packet) {
@@ -272,7 +268,7 @@ public class KageCloudCore implements ICloudNode {
 		CloudServer server = new CloudServer(connection, packet.getName(), serverAddress, false, packet.getTemplateName(), packet.isLobby());
 		connection.setConnectionRepresentation(server);
 
-		startingServerTemplates.remove(packet.getTemplateName());
+		startingServers.remove(packet.getId());
 
 		servers.put(packet.getId(), server);
 
@@ -367,8 +363,8 @@ public class KageCloudCore implements ICloudNode {
 	public int getCurrentServerAmount(String templateName) {
 		int amount = 0;
 
-		for(String startingServerTemplate : startingServerTemplates) {
-			if(startingServerTemplate.equals(templateName)) {
+		for(StartingServerData startingServerTemplate : startingServers.values()) {
+			if(startingServerTemplate.getTemplateName().equals(templateName)) {
 				amount++;
 			}
 		}

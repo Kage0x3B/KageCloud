@@ -12,6 +12,7 @@ import de.syscy.kagegui.inventory.component.KList;
 import de.syscy.kagegui.inventory.listener.ButtonClickListener;
 import de.syscy.kagegui.util.LoreBuilder;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
@@ -37,15 +38,9 @@ public class PlayerListGUI extends KGUI {
 			KButton playerButton = new KButton(0, 0);
 			playerButton.setTitle(player.getPlayerName());
 			playerButton.setIcon(new ItemIcon(skullItemStack));
-			playerButton.getLoreBuilder().set(LoreBuilder.DEFAULT_DESCRIPTION, "Rank: " + player.getRankName());
-			playerButton.getLoreBuilder().set(LoreBuilder.DEFAULT_DESCRIPTION + 1, "Current server: " + player.getCurrentServer().getName());
+			playerButton.getLoreBuilder().set(LoreBuilder.DEFAULT_DESCRIPTION, ChatColor.BLUE + "Current server: " + player.getCurrentServer().getName());
 
-			playerButton.setClickListener(new ButtonClickListener() {
-				@Override
-				public void onClick(KButton button, org.bukkit.entity.Player bukkitPlayer) {
-					KageGUI.showGUI(new ManagePlayerGUI(plugin, player), bukkitPlayer);
-				}
-			}, "Manage player");
+			playerButton.setClickListener((b, p) -> KageGUI.showGUI(new ManagePlayerGUI(plugin, player), p), "Manage player");
 
 			list.add(playerButton);
 		});

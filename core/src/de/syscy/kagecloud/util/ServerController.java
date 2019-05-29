@@ -17,8 +17,6 @@ public abstract class ServerController implements Runnable {
 	private @Setter KageCloudCore plugin;
 	private @Getter @Setter ScheduledTask task;
 
-	private final @Getter(lazy = true) StartingServerInfo startingServerInfoInstance = new StartingServerInfo();
-
 	public ServerController(String templateName) {
 		this.templateName = templateName.toLowerCase();
 	}
@@ -28,7 +26,7 @@ public abstract class ServerController implements Runnable {
 	}
 
 	protected List<CloudServer> getAllCurrentServers() {
-		List<CloudServer> serverInfoList = new ArrayList<>(plugin.getServers().size() + plugin.getStartingServerTemplates().size());
+		List<CloudServer> serverInfoList = new ArrayList<>(plugin.getServers().size() + plugin.getStartingServers().size());
 
 		for(CloudServer serverInfo : plugin.getServers().values()) {
 			if(serverInfo.getTemplateName().equals(templateName)) {
@@ -36,9 +34,9 @@ public abstract class ServerController implements Runnable {
 			}
 		}
 
-		for(String startingServerInfo : new ArrayList<>(plugin.getStartingServerTemplates())) {
-			if(templateName.equals(startingServerInfo)) {
-				serverInfoList.add(getStartingServerInfoInstance());
+		for(StartingServerData startingServerInfo : plugin.getStartingServers().values()) {
+			if(templateName.equals(startingServerInfo.getTemplateName())) {
+				serverInfoList.add(startingServerInfo);
 			}
 		}
 
@@ -47,16 +45,5 @@ public abstract class ServerController implements Runnable {
 
 	protected void createNewServer() {
 		plugin.createServer(templateName);
-	}
-
-	private class StartingServerInfo extends CloudServer {
-		protected StartingServerInfo() {
-			super(null, templateName, null, false, templateName, templateName.toLowerCase().contains("lobby"));
-		}
-
-		@Override
-		public Map<UUID, CloudPlayer> getPlayers() {
-			return new HashMap<>(0);
-		}
 	}
 }

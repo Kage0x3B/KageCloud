@@ -32,6 +32,7 @@ import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
 import de.syscy.kagecloud.network.packet.server.CreateServerPacket;
 import de.syscy.kagecloud.network.packet.server.ExecuteCommandPacket;
+import de.syscy.kagecloud.network.packet.server.KickAllPlayersPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.ChatMessageType;
 import de.syscy.kagecloud.util.UUID;
@@ -80,6 +81,7 @@ public class Packet {
 		kryo.register(ServerListPacket.class);
 		kryo.register(RequestPlayerListPacket.class);
 		kryo.register(PlayerListPacket.class);
+		kryo.register(KickAllPlayersPacket.class);
 
 		kryo.register(RelayPacket.class);
 		kryo.register(PluginDataPacket.class, new PluginDataPacket.PluginDataSerializer());

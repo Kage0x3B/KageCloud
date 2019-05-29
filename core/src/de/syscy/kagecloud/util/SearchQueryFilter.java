@@ -6,8 +6,8 @@ import java.util.regex.PatternSyntaxException;
 import com.google.common.base.Predicate;
 
 public class SearchQueryFilter implements Predicate<Object> {
-	private final boolean invalid;
 	private final boolean onInvalid;
+	private boolean invalid = false;
 
 	private String searchQuery = "";
 	private boolean regexMode = false;
@@ -20,8 +20,6 @@ public class SearchQueryFilter implements Predicate<Object> {
 			invalid = true;
 
 			return;
-		} else {
-			invalid = false;
 		}
 
 		if(searchQuery.startsWith("#")) {
@@ -31,7 +29,9 @@ public class SearchQueryFilter implements Predicate<Object> {
 
 				regexMode = true;
 			} catch(PatternSyntaxException ex) {
+				invalid = true;
 
+				return;
 			}
 		}
 
@@ -44,7 +44,7 @@ public class SearchQueryFilter implements Predicate<Object> {
 			return onInvalid;
 		}
 
-		String name = regexMode ? input.toString() : input.toString().toLowerCase();
+		String name = input.toString().toLowerCase();
 
 		return regexMode ? searchQueryPattern.matcher(name).matches() : name.contains(searchQuery);
 	}

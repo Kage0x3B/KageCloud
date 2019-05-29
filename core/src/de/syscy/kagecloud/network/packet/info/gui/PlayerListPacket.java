@@ -18,11 +18,12 @@ public class PlayerListPacket extends IDPacket {
 
 	@Data
 	public static class Player {
+		private String playerId;
 		private String playerName;
-		private String rankName;
 
 		private String proxyName;
 		private Server currentServer;
+		private int playerVersion;
 
 		private Player() {
 
@@ -36,11 +37,12 @@ public class PlayerListPacket extends IDPacket {
 		public static Player fromCloudPlayer(CloudPlayer cloudPlayer) {
 			Player player = new Player();
 
+			player.playerId = cloudPlayer.getId().toString();
 			player.playerName = cloudPlayer.getName();
-			player.rankName = "Not implemented"; //TODO: Implement ranks
 
 			player.proxyName = cloudPlayer.getBungeeCordProxy().getName();
 			player.currentServer = Server.fromCloudServer(cloudPlayer.getCurrentServer());
+			player.playerVersion = cloudPlayer.getVersion();
 
 			return player;
 		}

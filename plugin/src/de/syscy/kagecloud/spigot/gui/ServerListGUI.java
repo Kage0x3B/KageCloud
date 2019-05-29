@@ -41,12 +41,7 @@ public class ServerListGUI extends KGUI {
 				serverButton.getLoreBuilder().set(LoreBuilder.DEFAULT_DESCRIPTION + 2, ChatColor.RED + "Restricted");
 			}
 
-			serverButton.setClickListener(new ButtonClickListener() {
-				@Override
-				public void onClick(KButton button, Player player) {
-					KageGUI.showGUI(new ManageServerGUI(plugin, server), player);
-				}
-			}, "Manage server");
+			serverButton.setClickListener((button, player) -> KageGUI.showGUI(new ManageServerGUI(plugin, server), player), "Manage server");
 			list.add(serverButton);
 		});
 		add(list);

@@ -1,10 +1,6 @@
 package de.syscy.kagecloud.network;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import com.esotericsoftware.kryonet.Connection;
 import de.syscy.kagecloud.CloudPlayer;
 import de.syscy.kagecloud.CloudServer;
 import de.syscy.kagecloud.KageCloud;
@@ -25,18 +21,17 @@ import de.syscy.kagecloud.network.packet.node.ChangeStatusPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterProxyPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterWrapperPacket;
-import de.syscy.kagecloud.network.packet.player.ConnectPlayerIDPacket;
-import de.syscy.kagecloud.network.packet.player.ConnectPlayerPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerEarlyJoinServerPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerLateJoinServerPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
-import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
+import de.syscy.kagecloud.network.packet.player.*;
+import de.syscy.kagecloud.network.packet.server.CreateServerPacket;
+import de.syscy.kagecloud.network.packet.server.KickAllPlayersPacket;
 import de.syscy.kagecloud.network.packet.server.ReloadServerPacket;
 import de.syscy.kagecloud.util.SearchQueryFilter;
 import de.syscy.kagecloud.util.UUID;
 
-import com.esotericsoftware.kryonet.Connection;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class CloudNetworkListener extends CloudReflectionListener {
 	private final KageCloudCore core;
@@ -140,11 +135,17 @@ public class CloudNetworkListener extends CloudReflectionListener {
 		core.onPlayerJoin(connection, packet);
 	}
 
+	private CloudPlayer getPlayer(String uuid) {
+		return core.getPlayers().get(UUID.fromString(uuid));
+	}
+
+	private CloudServer getServer(String uuid) {
+		return core.getServers().get(UUID.fromString(uuid));
+	}
+
 	public void received(CloudCoreConnection connection, PlayerEarlyJoinServerPacket packet) {
-		UUID playerId = UUID.fromString(packet.getPlayerId());
-		UUID serverId = UUID.fromString(packet.getServerId());
-		CloudPlayer player = core.getPlayers().get(playerId);
-		CloudServer server = core.getServers().get(serverId);
+		CloudPlayer player = getPlayer(packet.getPlayerId());
+		CloudServer server = getServer(packet.getServerId());
 
 		if(player != null && server != null) {
 			player.setCurrentServer(server);
@@ -152,14 +153,12 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	}
 
 	public void received(CloudCoreConnection connection, PlayerLateJoinServerPacket packet) {
-		UUID playerId = UUID.fromString(packet.getPlayerId());
-		UUID serverId = UUID.fromString(packet.getServerId());
-		CloudPlayer player = core.getPlayers().get(playerId);
-		CloudServer server = core.getServers().get(serverId);
+		CloudPlayer player = getPlayer(packet.getPlayerId());
+		CloudServer server = getServer(packet.getServerId());
 
 		if(player != null && server != null) {
 			player.setCurrentServer(server);
-			server.getPlayers().put(playerId, player);
+			server.getPlayers().put(UUID.fromString(packet.getPlayerId()), player);
 
 			core.getPluginManager().callEvent(new ServerConnectedEvent(player, server));
 		}
@@ -171,8 +170,7 @@ public class CloudNetworkListener extends CloudReflectionListener {
 
 	public void received(CloudCoreConnection connection, PlayerLeaveServerPacket packet) {
 		UUID playerId = UUID.fromString(packet.getPlayerId());
-		UUID serverId = UUID.fromString(packet.getServerId());
-		CloudServer server = core.getServers().get(serverId);
+		CloudServer server = getServer(packet.getServerId());
 
 		if(server != null) {
 			server.getPlayers().remove(playerId);
@@ -266,7 +264,8 @@ public class CloudNetworkListener extends CloudReflectionListener {
 	public void received(CloudCoreConnection connection, RequestPlayerListPacket packet) {
 		List<Player> playerList = new ArrayList<>();
 
-		core.getPlayers().values().stream().filter(new SearchQueryFilter(packet.getSearchQuery(), false)).limit(10).forEach(player -> playerList.add(Player.fromCloudPlayer(player)));
+		SearchQueryFilter searchQueryFilter = new SearchQueryFilter(packet.getSearchQuery(), false);
+		core.getPlayers().values().stream().filter(searchQueryFilter).limit(10).forEach(p -> playerList.add(Player.fromCloudPlayer(p)));
 
 		PlayerListPacket response = new PlayerListPacket(playerList);
 		response.setId(packet.getId());
@@ -295,28 +294,26 @@ public class CloudNetworkListener extends CloudReflectionListener {
 
 		if(server != null) {
 			if(packet.isKickPlayers()) {
-				server.getPlayers().forEach((uuid, player) -> {
-					CloudServer lobbyServer = core.getJoinableLobbyServers(player).stream().max(new Comparator<CloudServer>() {
-						@Override
-						public int compare(CloudServer o1, CloudServer o2) {
-							return o1.getPlayers().size() - o2.getPlayers().size();
-						}
-					}).orElse(null);
-
-					if(lobbyServer != null) {
-						player.connect(lobbyServer);
-					}
-				});
+				server.getPlayers().forEach((uuid, player) -> core.getJoinableLobbyServers(player).stream().max(Comparator.comparingInt(o -> o.getPlayers().size())).ifPresent(player::connect));
 			}
 
 			core.getWrappers().forEach((uuid, wrapper) -> wrapper.sendTCP(packet));
 
-			core.getScheduler().schedule(core.getPluginManager().getCorePlugin(), new Runnable() {
-				@Override
-				public void run() {
-					server.getConnection().sendTCP(packet);
-				}
-			}, 2, TimeUnit.SECONDS);
+			core.getScheduler().schedule(core.getPluginManager().getCorePlugin(), () -> server.getConnection().sendTCP(packet), 2, TimeUnit.SECONDS);
+		}
+	}
+
+	public void received(CloudCoreConnection connection, CreateServerPacket packet) {
+		KageCloud.logger.info("Creating custom server " + packet.getServerName());
+
+		core.createServer(packet.getServerName(), packet.getTemplateName(), packet.getExtraData());
+	}
+
+	public void received(CloudCoreConnection connection, KickAllPlayersPacket packet) {
+		CloudServer server = core.getServers().values().parallelStream().filter(s -> s.getName().equalsIgnoreCase(packet.getServerName())).findAny().orElse(null);
+
+		if(server != null) {
+			server.getPlayers().forEach((uuid, player) -> core.getJoinableLobbyServers(player).stream().max(Comparator.comparingInt(o -> o.getPlayers().size())).ifPresent(player::connect));
 		}
 	}
 }
