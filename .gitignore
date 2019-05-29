@@ -36,3 +36,7 @@ gradle-app.setting
 gradle\.properties
 
 !waterfall.jar
+\.idea/
+
+*/out/*
+*/build/*
