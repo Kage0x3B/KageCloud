@@ -43,7 +43,7 @@ public class ManagePlayerGUI extends KGUI {
 			ConnectPlayerPacket packet = new ConnectPlayerPacket(player1.getUniqueId().toString(), player.getCurrentServer().getName());
 			plugin.getClient().sendTCP(packet);
 
-			button.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.EYE_OF_ENDER));
+			button.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.ENDER_EYE));
 		}, "Teleport you to this server");
 		add(teleportButton);
 
@@ -56,13 +56,13 @@ public class ManagePlayerGUI extends KGUI {
 
 			new TeleportRunnable(UUID.fromString(player.getPlayerId()), p).start(plugin);
 
-			b.displayStatus(10, ChatColor.GOLD + "Teleporting...", new ItemIcon(Material.EYE_OF_ENDER));
+			b.displayStatus(10, ChatColor.GOLD + "Teleporting...", new ItemIcon(Material.ENDER_EYE));
 		}, "Teleport the player to your server");
 		add(moveButton);
 
 		KButton manageServerButton = new KButton(3, 0);
 		manageServerButton.setTitle("Manage server");
-		manageServerButton.setIcon(new ItemIcon(Material.COMMAND_MINECART));
+		manageServerButton.setIcon(new ItemIcon(Material.COMMAND_BLOCK_MINECART));
 		manageServerButton.setClickListener((b, p) -> KageGUI.showGUI(new ManageServerGUI(plugin, player.getCurrentServer()), p), "Manage the players current server");
 		add(manageServerButton);
 	}

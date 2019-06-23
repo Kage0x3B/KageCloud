@@ -30,7 +30,7 @@ public class ServerListGUI extends KGUI {
 		serverList.forEach(server -> {
 			KButton serverButton = new KButton(0, 0);
 			serverButton.setTitle(server.getName());
-			serverButton.setIcon(new ItemIcon(Material.COMMAND_MINECART));
+			serverButton.setIcon(new ItemIcon(Material.COMMAND_BLOCK_MINECART));
 			serverButton.getLoreBuilder().set(LoreBuilder.DEFAULT_DESCRIPTION, "Template: " + server.getTemplateName());
 
 			if(server.isLobby()) {

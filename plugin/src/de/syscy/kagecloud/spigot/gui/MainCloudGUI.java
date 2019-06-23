@@ -21,7 +21,7 @@ public class MainCloudGUI extends KGUI {
 
 		KButton serverButton = new KButton(0, 0);
 		serverButton.setTitle("Server");
-		serverButton.setIcon(new ItemIcon(Material.COMMAND_MINECART));
+		serverButton.setIcon(new ItemIcon(Material.COMMAND_BLOCK_MINECART));
 		serverButton.setClickListener((button, player) -> {
 			plugin.getClient().sendIDPacket(new RequestServerListPacket(), (IDPacketListener<ServerListPacket>) (connection, packet) -> {
 				KageGUI.showGUI(new ServerListGUI(plugin, packet.getServer()), player);
@@ -30,7 +30,7 @@ public class MainCloudGUI extends KGUI {
 
 		add(serverButton);
 
-		ItemStack skullItemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		ItemStack skullItemStack = new ItemStack(Material.PLAYER_HEAD);
 
 		KButton findPlayer = new KButton(1, 0);
 		findPlayer.setTitle("Find player");

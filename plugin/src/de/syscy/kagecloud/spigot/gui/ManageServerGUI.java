@@ -57,7 +57,7 @@ public class ManageServerGUI extends KGUI {
 		teleportButton.setClickListener((b, p) -> {
 			plugin.getClient().sendTCP(new ConnectPlayerPacket(p.getUniqueId().toString(), server.getName()));
 
-			b.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.EYE_OF_ENDER));
+			b.displayStatus(Integer.MAX_VALUE, ChatColor.GOLD + "Teleporting you...", new ItemIcon(Material.ENDER_EYE));
 		}, "Teleport you to this server");
 		add(teleportButton);
 
@@ -74,7 +74,7 @@ public class ManageServerGUI extends KGUI {
 		kickPlayersButton.setClickListener((b, p) -> {
 			plugin.getClient().sendTCP(new KickAllPlayersPacket(server.getName()));
 
-			b.displayStatus(5, ChatColor.GOLD + "Kicked all players", new ItemIcon(new ItemStack(Material.WOOL, 1, (short) 0, (byte) 5)));
+			b.displayStatus(5, ChatColor.GOLD + "Kicked all players", new ItemIcon(Material.LIME_WOOL));
 		}, "Kick all players and send them to a lobby");
 		add(kickPlayersButton);
 
@@ -98,7 +98,7 @@ public class ManageServerGUI extends KGUI {
 			ReloadServerPacket packet = new ReloadServerPacket(server.getName(), kickPlayers);
 			plugin.getClient().sendTCP(packet);
 
-			button.displayStatus(20, ChatColor.YELLOW + "Reloading the server...", new ItemIcon(Material.WATCH));
+			button.displayStatus(20, ChatColor.YELLOW + "Reloading the server...", new ItemIcon(Material.CLOCK));
 		}
 	}
 }

@@ -1,7 +1,5 @@
 package de.syscy.kagecloud.spigot.gui;
 
-import java.util.List;
-
 import de.syscy.kagecloud.network.packet.info.gui.PlayerListPacket.Player;
 import de.syscy.kagecloud.spigot.KageCloudSpigot;
 import de.syscy.kagegui.KageGUI;
@@ -9,14 +7,13 @@ import de.syscy.kagegui.icon.ItemIcon;
 import de.syscy.kagegui.inventory.KGUI;
 import de.syscy.kagegui.inventory.component.KButton;
 import de.syscy.kagegui.inventory.component.KList;
-import de.syscy.kagegui.inventory.listener.ButtonClickListener;
 import de.syscy.kagegui.util.LoreBuilder;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+
+import java.util.List;
 
 public class PlayerListGUI extends KGUI {
 	public PlayerListGUI(KageCloudSpigot plugin, List<Player> playerList) {
@@ -30,7 +27,7 @@ public class PlayerListGUI extends KGUI {
 		list.setHeight(6);
 
 		playerList.forEach(player -> {
-			ItemStack skullItemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+			ItemStack skullItemStack = new ItemStack(Material.PLAYER_HEAD);
 			SkullMeta skullMeta = (SkullMeta) skullItemStack.getItemMeta();
 			skullMeta.setOwner(player.getPlayerName());
 			skullItemStack.setItemMeta(skullMeta);

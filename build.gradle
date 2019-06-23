@@ -17,7 +17,7 @@ allprojects {
     ext {
         appName = "KageCloud"
         
-        kageCoreVersion = 'f7cee0cbc8'
+        kageCoreVersion = 'a46a9dc7f4'
     }
 
     repositories {
@@ -108,8 +108,7 @@ project(":plugin") {
 
 		compile 'org.projectlombok:lombok:1.16.2'
 
-		compile files('libs/spigot-1.12.jar')
-		compileOnly "org.spigotmc:spigot-api:1.12-R0.1-SNAPSHOT"
+		compile files('libs/paperspigot-1.14-55.jar')
 		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
 		compile "com.github.Kage0x3B:KageCore:$kageCoreVersion"
     }
