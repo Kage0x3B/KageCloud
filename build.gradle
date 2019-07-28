@@ -108,7 +108,7 @@ project(":plugin") {
 
 		compile 'org.projectlombok:lombok:1.16.2'
 
-		compile files('libs/paperspigot-1.14-55.jar')
+		compile files('libs/paperspigot-1.14.4.jar')
 		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
 		compile "com.github.Kage0x3B:KageCore:$kageCoreVersion"
     }
