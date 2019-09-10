@@ -1,25 +1,11 @@
 package de.syscy.kagecloud;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import de.syscy.kagecloud.chat.BaseComponent;
-import de.syscy.kagecloud.chat.ComponentSerializer;
-import de.syscy.kagecloud.chat.TextComponent;
-import de.syscy.kagecloud.chat.TextComponentSerializer;
-import de.syscy.kagecloud.chat.TranslatableComponent;
-import de.syscy.kagecloud.chat.TranslatableComponentSerializer;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import de.syscy.kagecloud.chat.*;
 import de.syscy.kagecloud.configuration.file.FileConfiguration;
 import de.syscy.kagecloud.configuration.file.YamlConfiguration;
 import de.syscy.kagecloud.event.PlayerConnectedEvent;
@@ -32,8 +18,6 @@ import de.syscy.kagecloud.network.KryoServer;
 import de.syscy.kagecloud.network.packet.PluginDataPacket;
 import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.network.packet.node.RegisterServerPacket;
-import de.syscy.kagecloud.network.packet.player.LoginResultPacket;
-import de.syscy.kagecloud.network.packet.player.LoginResultPacket.Result;
 import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
@@ -44,17 +28,19 @@ import de.syscy.kagecloud.plugin.SimplePluginManager;
 import de.syscy.kagecloud.plugin.java.JavaPluginLoader;
 import de.syscy.kagecloud.scheduler.CloudScheduler;
 import de.syscy.kagecloud.scheduler.TaskScheduler;
-import de.syscy.kagecloud.util.*;
 import de.syscy.kagecloud.util.UUID;
+import de.syscy.kagecloud.util.*;
 import de.syscy.kagecloud.webserver.WebServer;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import lombok.Getter;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class KageCloudCore implements ICloudNode {
 	public static final Gson gson = new GsonBuilder().registerTypeAdapter(BaseComponent.class, new ComponentSerializer()).registerTypeAdapter(TextComponent.class, new TextComponentSerializer()).registerTypeAdapter(TranslatableComponent.class, new TranslatableComponentSerializer()).create();
@@ -232,7 +218,12 @@ public class KageCloudCore implements ICloudNode {
 
 	public void onPluginData(CloudCoreConnection sender, PluginDataPacket packet) {
 		if(pluginDataListeners.containsKey(packet.getChannel().toLowerCase())) {
-			pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+			try {
+				pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+			} catch(Exception ex) {
+				logger.info("Encountered exception in plugin data listener:");
+				ex.printStackTrace();
+			}
 		}
 	}
 

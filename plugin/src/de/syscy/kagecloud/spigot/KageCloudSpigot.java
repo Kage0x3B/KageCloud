@@ -91,7 +91,12 @@ public class KageCloudSpigot extends JavaPlugin implements ICloudNode {
 
 	public void onPluginData(Connection sender, PluginDataPacket packet) {
 		if(pluginDataListeners.containsKey(packet.getChannel().toLowerCase())) {
-			pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+			try {
+				pluginDataListeners.get(packet.getChannel().toLowerCase()).onPluginData(sender, packet);
+			} catch(Exception ex) {
+				getLogger().info("Encountered exception in plugin data listener:");
+				ex.printStackTrace();
+			}
 		}
 	}
 }

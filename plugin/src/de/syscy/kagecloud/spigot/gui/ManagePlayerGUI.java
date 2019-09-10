@@ -62,7 +62,7 @@ public class ManagePlayerGUI extends KGUI {
 
 		KButton manageServerButton = new KButton(3, 0);
 		manageServerButton.setTitle("Manage server");
-		manageServerButton.setIcon(new ItemIcon(Material.COMMAND_BLOCK_MINECART));
+		manageServerButton.setIcon(new ItemIcon(Material.REPEATING_COMMAND_BLOCK));
 		manageServerButton.setClickListener((b, p) -> KageGUI.showGUI(new ManageServerGUI(plugin, player.getCurrentServer()), p), "Manage the players current server");
 		add(manageServerButton);
 	}

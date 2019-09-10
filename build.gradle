@@ -24,6 +24,7 @@ allprojects {
 		jcenter()
 		maven { url "http://oss.sonatype.org/content/groups/public/" }
 		maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+		maven { url 'https://repo.velocitypowered.com/snapshots/' }
 		maven { url "https://jitpack.io" }
     }
 }
@@ -68,6 +69,32 @@ project(":bungee") {
 
 		compile files('libs/waterfall.jar')
     }
+
+	javadoc {
+		failOnError = false
+	}
+}
+
+project(":velocity") {
+    apply plugin: "java"
+	apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        compile project(":core")
+
+		compile 'org.projectlombok:lombok:1.16.2'
+
+		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
+		compile group: 'commons-io', name: 'commons-io', version: '2.5'
+
+		compile 'com.velocitypowered:velocity-api:1.0.0-SNAPSHOT'
+    }
+
+	shadowJar {
+		dependencies {
+			exclude(dependency('com.velocitypowered:velocity-api'))
+		}
+	}
 
 	javadoc {
 		failOnError = false
