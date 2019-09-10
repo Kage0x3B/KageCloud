@@ -7,7 +7,3 @@ sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = [ "res/" ]
 
 jar.archiveName = 'KageCloudVelocity.jar'
-
-eclipse.project {
-    name = appName + "-velocity"
-}
