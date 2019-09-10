@@ -38,5 +38,9 @@ gradle\.properties
 !waterfall.jar
 \.idea/
 
-*/out/*
-*/build/*
+**/out/
+**/build/
+**/bin/
+
+**/.settings/
+.project
