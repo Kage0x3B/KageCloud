@@ -8,8 +8,8 @@ import de.syscy.kagegui.KageGUI;
 import de.syscy.kagegui.icon.ItemIcon;
 import de.syscy.kagegui.inventory.KGUI;
 import de.syscy.kagegui.inventory.component.KButton;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.inventory.ItemStack;
 
 public class MainCloudGUI extends KGUI {
@@ -24,7 +24,7 @@ public class MainCloudGUI extends KGUI {
 		serverButton.setIcon(new ItemIcon(Material.REPEATING_COMMAND_BLOCK));
 		serverButton.setClickListener((button, player) -> {
 			plugin.getClient().sendIDPacket(new RequestServerListPacket(), (IDPacketListener<ServerListPacket>) (connection, packet) -> {
-				KageGUI.showGUI(new ServerListGUI(plugin, packet.getServer()), player);
+				Bukkit.getScheduler().runTask(plugin, () -> KageGUI.showGUI(new ServerListGUI(plugin, packet.getServer()), player));
 			});
 		}, "Open running server list");
 

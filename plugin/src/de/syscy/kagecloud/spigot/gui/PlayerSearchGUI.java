@@ -8,6 +8,7 @@ import de.syscy.kagegui.KageGUI;
 import de.syscy.kagegui.icon.ItemIcon;
 import de.syscy.kagegui.inventory.KGUI;
 import de.syscy.kagegui.inventory.component.KTextInput;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 public class PlayerSearchGUI extends KGUI {
@@ -27,7 +28,7 @@ public class PlayerSearchGUI extends KGUI {
 			}
 
 			plugin.getClient().sendIDPacket(new RequestPlayerListPacket(searchQuery), (IDPacketListener<PlayerListPacket>) (connection, packet) -> {
-				KageGUI.showGUI(new PlayerListGUI(plugin, packet.getPlayers()), player);
+				Bukkit.getScheduler().runTask(plugin, () -> KageGUI.showGUI(new PlayerListGUI(plugin, packet.getPlayers()), player));
 			});
 		});
 		add(searchTextInput);

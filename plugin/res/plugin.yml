@@ -5,6 +5,7 @@ website: http://syscy.de
 main: de.syscy.kagecloud.spigot.KageCloudSpigot
 load: startup
 depend: [KageCore]
+api-version: 1.14
 commands:
   cloud:
     description: Main KageCloud Plugin Command

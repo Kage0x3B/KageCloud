@@ -32,11 +32,12 @@ public class WebServer extends NanoHTTPD {
 	public WebServer(KageCloudCore cloud) {
 		super(7494);
 
+		/* TODO: Implement in another way in the future, this could be a security risk
 		try {
 			start(SOCKET_READ_TIMEOUT, false);
 		} catch(IOException ex) {
 			ex.printStackTrace();
-		}
+		}*/
 
 		AuthHandler authHandler = new AuthHandler(cloud, this);
 		addBackendRequestHandler("auth", authHandler);

@@ -67,7 +67,10 @@ public class CloudListener {
 
 		if(currentServer.isPresent()) {
 			CloudServerInfo currentServerInfo = plugin.getServerLookup().get(currentServer.get().getServerInfo());
-			plugin.getClient().sendTCP(new PlayerLeaveServerPacket(event.getPlayer().getUniqueId().toString(), currentServerInfo.getId().toString()));
+
+			if(currentServerInfo != null) {
+				plugin.getClient().sendTCP(new PlayerLeaveServerPacket(event.getPlayer().getUniqueId().toString(), currentServerInfo.getId().toString()));
+			}
 		}
 	}
 

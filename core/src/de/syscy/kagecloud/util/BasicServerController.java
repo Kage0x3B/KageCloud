@@ -36,12 +36,11 @@ public class BasicServerController extends ServerController {
 			}
 		}
 
-		for(currentServerAmount++; availableServers < minAvailableServers; availableServers++, currentServerAmount++) {
-			if(currentServerAmount > maxServers) {
-				break;
-			}
+		while(availableServers < this.minAvailableServers && currentServerAmount < this.maxServers) {
+			this.createNewServer();
 
-			createNewServer();
+			availableServers++;
+			currentServerAmount++;
 		}
 	}
 
