@@ -1,9 +1,0 @@
-{
-  "id": "kagecloud-velocity",
-  "name": "KageCloud Velocity",
-  "version": "1.0",
-  "description": "KageCloud Proxy plugin",
-  "authors": ["Kage0x3B"],
-  "dependencies": [],
-  "main": "de.syscy.kagecloud.KageCloudVelocity"
-}
