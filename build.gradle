@@ -29,8 +29,6 @@ allprojects {
     }
 
 	ext {
-		appName = "KageCloud"
-
 		lombokVersion = "1.18.20"
 
 		purpurVersion = "1.16.5-SNAPSHOT"
