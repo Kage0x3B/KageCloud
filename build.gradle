@@ -1,12 +1,11 @@
 buildscript {
     repositories {
-		maven {
-			url "https://repo.syscy.de/repository/maven-public/"
-		}
+		mavenCentral()
+		jcenter()
     }
 
 	dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+		classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
     }
 }
 
@@ -102,13 +101,13 @@ project(":plugin") {
 		compileOnly "org.projectlombok:lombok:1.18.12"
 		annotationProcessor "org.projectlombok:lombok:1.18.12"
 
-		implementation "com.destroystokyo:paper-nms:1.14.4-SNAPSHOT"
-		implementation "de.syscy:kagecore:1.0-SNAPSHOT"
+		implementation "net.pl3x:purpur-server:1.16.5-SNAPSHOT"
+		implementation "de.syscy:kagecore:1.0.0-SNAPSHOT"
     }
     
     shadowJar {
     	dependencies {
-			exclude(dependency("com.destroystokyo:paper-nms:1.14.4-SNAPSHOT"))
+			exclude(dependency("net.pl3x:purpur-server:1.16.5-SNAPSHOT"))
     		exclude(dependency("de.syscy:kagecore:1.0-SNAPSHOT"))
     	}
     }
