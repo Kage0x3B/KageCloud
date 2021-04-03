@@ -5,15 +5,15 @@ buildscript {
     }
 
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
+		classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
 
 allprojects {
 	apply plugin: "java"
-	apply plugin: 'com.github.johnrengelman.shadow'
+	apply plugin: "com.github.johnrengelman.shadow"
 
-    version = '1.0'
+    version = "1.0.0"
 
     repositories {
 		maven {
@@ -23,29 +23,43 @@ allprojects {
 				artifact()
 			}
 		}
+		maven {
+			url "https://nexus.velocitypowered.com/repository/maven-public/"
+		}
     }
 
-	dependencies {
-		compileOnly "org.projectlombok:lombok:1.18.12"
-		annotationProcessor "org.projectlombok:lombok:1.18.12"
+	ext {
+		appName = "KageCloud"
 
-		implementation 'com.esotericsoftware:kryonet:2.22.0-RC1'
+		lombokVersion = "1.18.20"
+
+		purpurVersion = "1.16.5-SNAPSHOT"
+		luckPermsVersion = "5.3"
+		velocityVersion = "1.1.4"
+		kageCoreVersion = "1.0.0-SNAPSHOT"
+	}
+
+	dependencies {
+		compileOnly "org.projectlombok:lombok:$lombokVersion"
+		annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+		implementation "com.esotericsoftware:kryonet:2.22.0-RC1"
 	}
 }
 
 project(":core") {
 	jar {
 	    manifest {
-	        attributes 'Main-Class': 'de.syscy.kagecloud.KageCloudCore'
+	        attributes "Main-Class": "de.syscy.kagecloud.KageCloudCore"
 	    }
 	}
 
     dependencies {
-		implementation 'org.yaml:snakeyaml:1.26'
-		implementation 'com.google.guava:guava:21.0'
-		implementation 'commons-io:commons-io:2.5'
-		implementation 'com.google.code.gson:gson:2.8.0'
-		implementation 'org.nanohttpd:nanohttpd:2.3.1'
+		implementation "org.yaml:snakeyaml:1.26"
+		implementation "com.google.guava:guava:21.0"
+		implementation "commons-io:commons-io:2.5"
+		implementation "com.google.code.gson:gson:2.8.0"
+		implementation "org.nanohttpd:nanohttpd:2.3.1"
     }
 
 	javadoc {
@@ -55,18 +69,18 @@ project(":core") {
 
 project(":velocity") {
     dependencies {
-		annotationProcessor 'com.velocitypowered:velocity-api:1.0.0-SNAPSHOT'
+		annotationProcessor "com.velocitypowered:velocity-api:$velocityVersion"
 
 		implementation project(":core")
 
-		implementation 'commons-io:commons-io:2.5'
+		implementation "commons-io:commons-io:2.5"
 
-		compileOnly 'com.velocitypowered:velocity-api:1.0.0-SNAPSHOT'
+		compileOnly "com.velocitypowered:velocity-api:$velocityVersion"
     }
 
 	shadowJar {
 		dependencies {
-			exclude(dependency('com.velocitypowered:velocity-api'))
+			exclude(dependency("com.velocitypowered:velocity-api"))
 		}
 	}
 
@@ -78,15 +92,15 @@ project(":velocity") {
 project(":wrapper") {
 	jar {
 	    manifest {
-	        attributes 'Main-Class': 'de.syscy.kagecloud.wrapper.KageCloudWrapper'
+	        attributes "Main-Class": "de.syscy.kagecloud.wrapper.KageCloudWrapper"
 	    }
 	}
 
     dependencies {
 		implementation project(":core")
 
-		implementation 'org.yaml:snakeyaml:1.26'
-		implementation 'commons-io:commons-io:2.5'
+		implementation "org.yaml:snakeyaml:1.26"
+		implementation "commons-io:commons-io:2.5"
     }
 
 	javadoc {
@@ -98,17 +112,14 @@ project(":plugin") {
     dependencies {
 		implementation project(":core")
 
-		compileOnly "org.projectlombok:lombok:1.18.12"
-		annotationProcessor "org.projectlombok:lombok:1.18.12"
-
-		implementation "net.pl3x:purpur-server:1.16.5-SNAPSHOT"
-		implementation "de.syscy:kagecore:1.0.0-SNAPSHOT"
+		implementation "net.pl3x:purpur-server:$purpurVersion"
+		implementation "de.syscy:kagecore:$kageCoreVersion"
     }
     
     shadowJar {
     	dependencies {
-			exclude(dependency("net.pl3x:purpur-server:1.16.5-SNAPSHOT"))
-    		exclude(dependency("de.syscy:kagecore:1.0-SNAPSHOT"))
+			exclude(dependency("net.pl3x:purpur-server"))
+    		exclude(dependency("de.syscy:kagecore"))
     	}
     }
 
