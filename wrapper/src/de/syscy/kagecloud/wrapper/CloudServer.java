@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudServer {
-    private static final int SERVER_SHUTDOWN_TIMEOUT = 120 * 1000;
+    private static final int SERVER_SHUTDOWN_TIMEOUT = 60 * 1000;
 
     private final KageCloudWrapper wrapper;
     private final @Getter
@@ -185,8 +185,8 @@ public class CloudServer {
 
         try {
             FileUtils.deleteDirectory(serverFolder);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException ignored) {
+            System.out.println("Could not fully cleanup server folder " + serverFolder.getName());
         }
 
         wrapper.removeServer(this);
