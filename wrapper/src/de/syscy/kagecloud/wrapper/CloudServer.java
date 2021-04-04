@@ -1,5 +1,13 @@
 package de.syscy.kagecloud.wrapper;
 
+import de.syscy.kagecloud.KageCloud;
+import de.syscy.kagecloud.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -8,250 +16,284 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import de.syscy.kagecloud.KageCloud;
-import de.syscy.kagecloud.util.UUID;
-
-import org.apache.commons.io.FileUtils;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
 public class CloudServer {
-	private static final int SERVER_SHUTDOWN_TIMEOUT = 120 * 1000;
+    private static final int SERVER_SHUTDOWN_TIMEOUT = 120 * 1000;
 
-	private final KageCloudWrapper wrapper;
-	private final @Getter ServerTemplate template;
-	private final @Getter Map<String, String> extraData;
+    private final KageCloudWrapper wrapper;
+    private final @Getter
+    ServerTemplate template;
+    private final @Getter
+    Map<String, String> extraData;
 
-	private final @Getter UUID serverId;
-	private final @Getter String serverName;
-	private final @Getter String templateName;
+    private final @Getter
+    UUID serverId;
+    private final @Getter
+    String serverName;
+    private final @Getter
+    String templateName;
 
-	private @Getter Process process;
+    private @Getter
+    Process process;
 
-	private @Getter File serverFolder;
-	private File pluginsFolder;
+    private @Getter
+    File serverFolder;
+    private File pluginsFolder;
 
-	public CloudServer(KageCloudWrapper wrapper, ServerTemplate template, Map<String, String> extraData) {
-		this.wrapper = wrapper;
-		this.template = template;
-		this.extraData = extraData;
+    public CloudServer(KageCloudWrapper wrapper, ServerTemplate template, Map<String, String> extraData) {
+        this.wrapper = wrapper;
+        this.template = template;
+        this.extraData = extraData;
 
-		serverId = template.getServerId();
-		serverName = template.getServerName();
-		templateName = template.getTemplateName();
-	}
+        serverId = template.getServerId();
+        serverName = template.getServerName();
+        templateName = template.getTemplateName();
+    }
 
-	public void prepareServerFolder() throws IOException {
-		serverFolder = new File(wrapper.getServersDirectory(), serverId.toString());
-		serverFolder.mkdirs();
+    public void prepareServerFolder() throws IOException {
+        serverFolder = new File(wrapper.getServersDirectory(), serverId.toString());
+        serverFolder.mkdirs();
 
-		pluginsFolder = new File(serverFolder, "plugins");
-		pluginsFolder.mkdirs();
+        pluginsFolder = new File(serverFolder, "plugins");
+        pluginsFolder.mkdirs();
 
-		copySharedData();
-		copyTemplateData();
+        copySharedData();
+        copyTemplateData();
 
-		FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
-	}
+        FileUtils.copyFile(template.getServerJAR(), new File(serverFolder, "server.jar"));
+    }
 
-	public void copySharedData() throws IOException {
-		copyGeneralData();
-		copyPlugins();
-		copyPluginData();
-		copyWorld();
-	}
+    public void copySharedData() throws IOException {
+        copyGeneralData();
+        copyPlugins();
+        copyPluginData();
+        copyWorld();
+    }
 
-	public void copyGeneralData() throws IOException {
-		FileUtils.copyDirectory(wrapper.getGeneralDataDirectory(), serverFolder);
-	}
+    public void copyGeneralData() throws IOException {
+        FileUtils.copyDirectory(wrapper.getGeneralDataDirectory(), serverFolder);
+    }
 
-	public void copyPlugins() throws IOException {
-		List<String> pluginNames = template.getPlugins();
+    public void copyPlugins() throws IOException {
+        List<String> pluginNames = template.getPlugins();
 
-		for(File pluginFile : wrapper.getGlobalPluginDirectory().listFiles(JARFileFilter.getInstance())) {
-			String pluginFileName = pluginFile.getName().substring(0, pluginFile.getName().length() - 4); //Removes the .jar (the 4 last characters)
+        for (File pluginFile : wrapper.getGlobalPluginDirectory().listFiles(JARFileFilter.getInstance())) {
+            String pluginFileName = pluginFile.getName().substring(0, pluginFile.getName().length() - 4); //Removes the .jar (the 4 last characters)
 
-			for(String pluginName : pluginNames) {
-				if(pluginFileName.equalsIgnoreCase(pluginName)) {
-					FileUtils.copyFileToDirectory(pluginFile, pluginsFolder);
+            for (String pluginName : pluginNames) {
+                if (pluginFileName.equalsIgnoreCase(pluginName)) {
+                    FileUtils.copyFileToDirectory(pluginFile, pluginsFolder);
 
-					break;
-				}
-			}
-		}
-	}
+                    break;
+                }
+            }
+        }
+    }
 
-	public void copyPluginData() throws IOException {
-		FileUtils.copyDirectory(wrapper.getPluginDataDirectory(), pluginsFolder);
-	}
+    public void copyPluginData() throws IOException {
+        FileUtils.copyDirectory(wrapper.getPluginDataDirectory(), pluginsFolder);
+    }
 
-	public void copyWorld() throws IOException {
-		String worldName = template.getWorldName();
+    public void copyWorld() throws IOException {
+        String worldName = template.getWorldName();
 
-		if(extraData.containsKey("worldOverride")) {
-			worldName = extraData.get("worldOverride");
-		}
+        if (extraData.containsKey("worldOverride")) {
+            worldName = extraData.get("worldOverride");
+        }
 
-		if(worldName == null || worldName.isEmpty()) {
-			return;
-		}
+        if (worldName == null || worldName.isEmpty()) {
+            return;
+        }
 
-		File worldDirectory = new File(wrapper.getWorldsDirectory(), template.getWorldName());
-		File destDirectory = new File(serverFolder, "world");
-		destDirectory.mkdirs();
+        File worldDirectory = new File(wrapper.getWorldsDirectory(), template.getWorldName());
+        File destDirectory = new File(serverFolder, "world");
+        destDirectory.mkdirs();
 
-		if(worldDirectory.exists() && worldDirectory.isDirectory()) {
-			FileUtils.copyDirectory(worldDirectory, destDirectory);
-		} else {
-			KageCloud.logger.warning("World directory does not exist: " + template.getWorldName() + " (Should be at " + worldDirectory.getAbsolutePath() + ")");
-		}
-	}
+        if (worldDirectory.exists() && worldDirectory.isDirectory()) {
+            FileUtils.copyDirectory(worldDirectory, destDirectory);
+        } else {
+            KageCloud.logger.warning("World directory does not exist: " + template.getWorldName() + " (Should be at " + worldDirectory.getAbsolutePath() + ")");
+        }
+    }
 
-	public void copyTemplateData() throws IOException {
-		FileUtils.copyDirectory(template.getTemplateDirectory(), serverFolder);
-	}
+    public void copyTemplateData() throws IOException {
+        FileUtils.copyDirectory(template.getTemplateDirectory(), serverFolder);
+    }
 
-	public void start() {
-		new Thread(() -> {
-			List<String> commands = buildCommands(template);
+    public void start() {
+        new Thread(() -> {
+            List<String> commands = buildCommands(template);
 
-			ProcessBuilder processBuilder = new ProcessBuilder(commands);
+            ProcessBuilder processBuilder = new ProcessBuilder(commands);
 
-			processBuilder.environment().put("KC_serverId", serverId.toString());
-			processBuilder.environment().put("KC_serverName", serverName);
-			processBuilder.environment().put("KC_templateName", templateName);
-			processBuilder.environment().put("KC_wrapperName", wrapper.getNodeName());
-			processBuilder.environment().put("KC_isLobbyServer", Boolean.toString(template.isLobby()));
+            processBuilder.environment().put("KC_serverId", serverId.toString());
+            processBuilder.environment().put("KC_serverName", serverName);
+            processBuilder.environment().put("KC_templateName", templateName);
+            processBuilder.environment().put("KC_wrapperName", wrapper.getNodeName());
+            processBuilder.environment().put("KC_isLobbyServer", Boolean.toString(template.isLobby()));
 
-			for(Map.Entry<String, String> extraDataEntry : extraData.entrySet()) {
-				processBuilder.environment().put("KC_" + extraDataEntry.getKey(), extraDataEntry.getValue());
-			}
+            for (Map.Entry<String, String> extraDataEntry : extraData.entrySet()) {
+                processBuilder.environment().put("KC_" + extraDataEntry.getKey(), extraDataEntry.getValue());
+            }
 
-			processBuilder.directory(serverFolder);
+            processBuilder.directory(serverFolder);
 
-			//DEBUG Code
-			processBuilder.redirectErrorStream(true);
-			processBuilder.redirectOutput(Redirect.INHERIT);
-			processBuilder.redirectError(Redirect.INHERIT);
+            //DEBUG Code
+            processBuilder.redirectErrorStream(true);
+            processBuilder.redirectOutput(Redirect.INHERIT);
+            processBuilder.redirectError(Redirect.INHERIT);
 
-			try {
-				process = processBuilder.start();
-				KageCloud.logger.info("Started server!");
-				process.waitFor();
+            try {
+                process = processBuilder.start();
+                KageCloud.logger.info("Started server!");
+                process.waitFor();
 
-				KageCloud.logger.info("Server " + serverName + " went offline");
-			} catch(IOException ex) {
-				System.out.println("Error while starting the server (template: " + templateName + ")");
+                KageCloud.logger.info("Server " + serverName + " went offline");
+            } catch (IOException ex) {
+                System.out.println("Error while starting the server (template: " + templateName + ")");
 
-				ex.printStackTrace();
-			} catch(InterruptedException ex) {
-				ex.printStackTrace();
-			} finally {
-				cleanUp();
-			}
-		}).start();
-	}
+                ex.printStackTrace();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            } finally {
+                cleanUp();
+            }
+        }).start();
+    }
 
-	public void shutdown() {
-		if(process != null) {
-			try {
-				process.getOutputStream().write("stop\n".getBytes());
-			} catch(IOException ex) {
-				ex.printStackTrace();
-			}
+    public void shutdown() {
+        if (process != null) {
+            try {
+                process.getOutputStream().write("stop\n".getBytes());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
 
-			int exitValue = shutdownProcess(SERVER_SHUTDOWN_TIMEOUT);
+            int exitValue = shutdownProcess(SERVER_SHUTDOWN_TIMEOUT);
 
-			KageCloud.logger.info("Server " + serverName + " was shutdown (code: " + exitValue + ")");
+            KageCloud.logger.info("Server " + serverName + " was shutdown (code: " + exitValue + ")");
 
-			process = null;
-		}
+            process = null;
+        }
 
-		cleanUp();
-	}
+        cleanUp();
+    }
 
-	public void cleanUp() {
-		if(process != null) {
-			process.destroy();
-		}
+    public void cleanUp() {
+        if (process != null) {
+            process.destroy();
+        }
 
-		try {
-			FileUtils.deleteDirectory(serverFolder);
-		} catch(IOException ex) {
-			ex.printStackTrace();
-		}
+        try {
+            FileUtils.deleteDirectory(serverFolder);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
-		wrapper.removeServer(this);
-	}
+        wrapper.removeServer(this);
+    }
 
-	private int shutdownProcess(int timeout) {
-		Worker worker = new Worker(process);
-		worker.start();
+    private int shutdownProcess(int timeout) {
+        Worker worker = new Worker(process);
+        worker.start();
 
-		try {
-			worker.join(timeout);
+        try {
+            worker.join(timeout);
 
-			if(worker.getExitValue() != null) {
-				return worker.getExitValue();
-			} else {
-				return -1;
-			}
-		} catch(InterruptedException ex) {
-			worker.interrupt();
-			Thread.currentThread().interrupt();
-		} finally {
-			process.destroy();
-		}
+            if (worker.getExitValue() != null) {
+                return worker.getExitValue();
+            } else {
+                return -1;
+            }
+        } catch (InterruptedException ex) {
+            worker.interrupt();
+            Thread.currentThread().interrupt();
+        } finally {
+            process.destroy();
+        }
 
-		return process.exitValue();
-	}
+        return process.exitValue();
+    }
 
-	private List<String> buildCommands(ServerTemplate template) {
-		List<String> commands = new ArrayList<>();
-		int port = wrapper.getNextPort();
+    private List<String> buildCommands(ServerTemplate template) {
+        List<String> commands = new ArrayList<>();
+        int port = wrapper.getNextPort();
 
-		commands.add(System.getProperty("java.home") + "/bin/java");
-		commands.add("-Xmx" + template.getMemory() + "M");
-		commands.add("-Xms" + template.getMemory() + "M");
-		commands.add("-jar");
-		commands.add(template.getServerJAR().getAbsolutePath());
+        commands.add(System.getProperty("java.home") + "/bin/java");
 
-		commands.add("--port");
-		commands.add(Integer.toString(port));
-		commands.add("--max-players");
-		commands.add(Integer.toString(template.getSlots()));
-		commands.add("--o");
-		commands.add("false");
-		commands.add("--nojline");
+        commands.add("-Xms" + template.getMemory() + "M");
+        commands.add("-Xmx" + template.getMemory() + "M");
 
-		return commands;
-	}
+        // Aikars flags - https://mcflags.emc.gs
+        commands.add("-XX:+UseG1GC");
+        commands.add("-XX:+ParallelRefProcEnabled");
+        commands.add("-XX:MaxGCPauseMillis=200");
+        commands.add("-XX:+UnlockExperimentalVMOptions");
+        commands.add("-XX:+DisableExplicitGC");
+        commands.add("-XX:+AlwaysPreTouch");
 
-	@NoArgsConstructor(access = AccessLevel.PRIVATE)
-	private static class JARFileFilter implements FileFilter {
-		private static final @Getter(lazy = true) JARFileFilter instance = new JARFileFilter();
+        if (template.getMemory() > 12 * 1024) {
+            commands.add("-XX:G1NewSizePercent=40");
+            commands.add("-XX:G1MaxNewSizePercent=50");
+            commands.add("-XX:G1HeapRegionSize=16M");
+            commands.add("-XX:G1ReservePercent=15");
+            commands.add("-XX:InitiatingHeapOccupancyPercent=20");
+        } else {
+            commands.add("-XX:G1NewSizePercent=30");
+            commands.add("-XX:G1MaxNewSizePercent=40");
+            commands.add("-XX:G1HeapRegionSize=8M");
+            commands.add("-XX:G1ReservePercent=20");
+            commands.add("-XX:InitiatingHeapOccupancyPercent=15");
+        }
 
-		@Override
-		public boolean accept(File pathname) {
-			return pathname.getAbsolutePath().toLowerCase().endsWith(".jar");
-		}
-	}
+        commands.add("-XX:G1HeapWastePercent=5");
+        commands.add("-XX:G1MixedGCCountTarget=4");
+        commands.add("-XX:G1MixedGCLiveThresholdPercent=90");
+        commands.add("-XX:G1RSetUpdatingPauseTimePercent=5");
+        commands.add("-XX:SurvivorRatio=32");
+        commands.add("-XX:+PerfDisableSharedMem");
+        commands.add("-XX:MaxTenuringThreshold=1");
+        commands.add("-Dusing.aikars.flags=https://mcflags.emc.gs");
+        commands.add("-Daikars.new.flags=true");
 
-	@RequiredArgsConstructor
-	private static class Worker extends Thread {
-		private final Process process;
-		private @Getter Integer exitValue;
+        commands.add("-jar");
+        commands.add(template.getServerJAR().getAbsolutePath());
 
-		@Override
-		public void run() {
-			try {
-				exitValue = process.waitFor();
-			} catch(InterruptedException ex) {
+        commands.add("--port");
+        commands.add(Integer.toString(port));
+        commands.add("--max-players");
+        commands.add(Integer.toString(template.getSlots()));
+        commands.add("--o");
+        commands.add("false");
+        commands.add("--nojline");
+        commands.add("--nogui");
 
-			}
-		}
-	}
+        return commands;
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class JARFileFilter implements FileFilter {
+        private static final @Getter(lazy = true)
+        JARFileFilter instance = new JARFileFilter();
+
+        @Override
+        public boolean accept(File pathname) {
+            return pathname.getAbsolutePath().toLowerCase().endsWith(".jar");
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static class Worker extends Thread {
+        private final Process process;
+        private @Getter
+        Integer exitValue;
+
+        @Override
+        public void run() {
+            try {
+                exitValue = process.waitFor();
+            } catch (InterruptedException ex) {
+
+            }
+        }
+    }
 }
