@@ -185,7 +185,7 @@ public class CloudServer {
 
         try {
             FileUtils.deleteDirectory(serverFolder);
-        } catch (IOException ignored) {
+        } catch (Exception ignored) {
             System.out.println("Could not fully cleanup server folder " + serverFolder.getName());
         }
 
