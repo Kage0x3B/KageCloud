@@ -18,7 +18,8 @@ import de.syscy.kagecloud.network.packet.player.*;
 import de.syscy.kagecloud.network.packet.proxy.AddServerPacket;
 import de.syscy.kagecloud.network.packet.proxy.RemoveServerPacket;
 import lombok.RequiredArgsConstructor;
-import net.kyori.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -55,15 +56,15 @@ public class CloudProxyNetworkListener extends ReflectionListener {
 	public void received(Connection connection, KickPlayerPacket packet) {
 		Optional<Player> player = plugin.getProxy().getPlayer(UUID.fromString(packet.getPlayerId()));
 
-		player.ifPresent(value -> value.disconnect(GsonComponentSerializer.INSTANCE.deserialize(packet.getJsonReason())));
+		player.ifPresent(value -> value.disconnect(GsonComponentSerializer.gson().deserialize(packet.getJsonReason())));
 	}
 
 	public void received(Connection connection, MessagePacket packet) {
 		Optional<Player> player = plugin.getProxy().getPlayer(UUID.fromString(packet.getReceiverId()));
 
 		if(player.isPresent()) {
-			MessagePosition messagePosition = MessagePosition.values()[packet.getType().ordinal()];
-			player.get().sendMessage(GsonComponentSerializer.INSTANCE.deserialize(packet.getJsonMessage()), messagePosition);
+			MessageType messageType = MessageType.values()[packet.getType().ordinal()];
+			player.get().sendMessage(GsonComponentSerializer.gson().deserialize(packet.getJsonMessage()), messageType);
 		}
 	}
 

@@ -16,8 +16,8 @@ import de.syscy.kagecloud.network.packet.player.PlayerJoinNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveNetworkPacket;
 import de.syscy.kagecloud.network.packet.player.PlayerLeaveServerPacket;
 import lombok.RequiredArgsConstructor;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Collections;
 import java.util.List;
@@ -79,7 +79,7 @@ public class CloudListener {
 		//Equivalent to BungeeCords ReconnectHandler
 		if(event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase("dummy")) {
 			if(plugin.isMaintenanceMode()) {
-				event.getPlayer().disconnect(TextComponent.builder("The network is currently in ", TextColor.GOLD).append("maintenance mode", TextColor.RED).append(", please come back later...", TextColor.GOLD).build());
+				event.getPlayer().disconnect(Component.text("The network is currently in ", TextColor.fromCSSHexString("#FFAA00")).append(Component.text("maintenance mode", TextColor.color(255, 0, 0))).append(Component.text(", please come back later...", TextColor.fromCSSHexString("#FFAA00"))));
 
 				return;
 			}
@@ -96,7 +96,7 @@ public class CloudListener {
 				}
 			}
 
-			event.getPlayer().disconnect(TextComponent.of("No lobby server available.", TextColor.RED));
+			event.getPlayer().disconnect(Component.text("No lobby server available.", TextColor.color(255, 0, 0)));
 		}
 	}
 }

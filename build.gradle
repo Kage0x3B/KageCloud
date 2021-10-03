@@ -33,7 +33,7 @@ allprojects {
 
 		purpurVersion = "1.16.5-SNAPSHOT"
 		luckPermsVersion = "5.3"
-		velocityVersion = "1.1.4"
+		velocityVersion = "3.0.1"
 		kageCoreVersion = "1.0.0-SNAPSHOT"
 	}
 

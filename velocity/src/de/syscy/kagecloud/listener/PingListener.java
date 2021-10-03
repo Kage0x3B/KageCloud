@@ -9,10 +9,9 @@ import de.syscy.kagecloud.KageCloudVelocity;
 import de.syscy.kagecloud.network.packet.info.UpdatePingDataPacket;
 import de.syscy.kagecloud.util.ChatColor;
 import lombok.Setter;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.UUID;
 
@@ -27,7 +26,7 @@ public class PingListener {
 	private @Setter int maxPlayers = 1;
 	private @Setter int onlinePlayers = 0;
 	private @Setter String[] playerInfoHover = new String[0];
-	private @Setter Component description = TextComponent.of("KageCloud Network");
+	private @Setter Component description = Component.text("KageCloud Network");
 	private @Setter String faviconData = null;
 
 	private Favicon favicon = null;
@@ -45,7 +44,7 @@ public class PingListener {
 		ServerPing.Builder maintenancePingBuilder = ServerPing.builder();
 		maintenancePingBuilder.version(new ServerPing.Version(0, "Maintenance Mode"));
 		maintenancePingBuilder.samplePlayers(playerInfoHoverData);
-		maintenancePingBuilder.description(TextComponent.of("Maintenance Mode", TextColor.RED));
+		maintenancePingBuilder.description(Component.text("Maintenance Mode", TextColor.color(255, 0, 0)));
 		maintenanceModePing = maintenancePingBuilder.build();
 	}
 
@@ -75,7 +74,7 @@ public class PingListener {
 		}
 
 		if(packet.getMotd() != null) {
-			description = LegacyComponentSerializer.legacy().deserialize(packet.getMotd(), '&');
+			description = LegacyComponentSerializer.legacyAmpersand().deserialize(packet.getMotd());
 		}
 
 		if(packet.getFaviconData() != null) {
